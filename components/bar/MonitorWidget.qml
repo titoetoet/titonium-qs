@@ -14,7 +14,7 @@ Item {
     property bool expanded: false
     readonly property Item inputRegion: dropdown.inputRegion
 
-    property var processes: []
+    property ListModel processes: ListModel {}
 
     onExpandedChanged: {
         if (expanded)
@@ -42,15 +42,23 @@ Item {
 
         onExited: {
             const rows = processOutput.text.trim().split("\n").filter(line => line.trim()).slice(0, 10);
-            root.processes = rows.map(line => {
-                const fields = line.trim().split(/\s+/);
-                return {
-                    pid: fields[0],
-                    name: fields[1],
-                    cpu: fields[2],
-                    memory: fields[3]
+            for (let i = 0; i < rows.length; i++) {
+                const fields = rows[i].trim().split(/\s+/);
+                const item = {
+                    pid: fields[0] || "",
+                    name: fields[1] || "",
+                    cpu: fields[2] || "0",
+                    memory: fields[3] || "0"
                 };
-            });
+                if (i < root.processes.count) {
+                    root.processes.set(i, item);
+                } else {
+                    root.processes.append(item);
+                }
+            }
+            while (root.processes.count > rows.length) {
+                root.processes.remove(root.processes.count - 1);
+            }
         }
     }
 
@@ -161,31 +169,29 @@ Item {
 
                         RowLayout {
                             id: procRow
-                            required property var modelData
-
-                            readonly property bool hasProc: procRow.modelData !== null && procRow.modelData !== undefined
-                            readonly property string procPid: procRow.hasProc && procRow.modelData.pid ? String(procRow.modelData.pid) : ""
-                            readonly property string procName: procRow.hasProc && procRow.modelData.name ? String(procRow.modelData.name) : ""
-                            readonly property string procCpu: procRow.hasProc && procRow.modelData.cpu !== undefined ? (procRow.modelData.cpu + "%") : "0%"
-                            readonly property string procMem: procRow.hasProc && procRow.modelData.memory !== undefined ? (procRow.modelData.memory + "%") : "0%"
+                            required property string pid
+                            required property string name
+                            required property string cpu
+                            required property string memory
+                            required property int index
 
                             Layout.fillWidth: true
                             Layout.preferredHeight: 13
                             spacing: 6
 
-                            ProcessValue { text: procRow.procPid; Layout.preferredWidth: 46 }
+                            ProcessValue { text: procRow.pid; Layout.preferredWidth: 46 }
                             ProcessValue {
-                                text: procRow.procName
+                                text: procRow.name
                                 Layout.fillWidth: true
                                 elide: Text.ElideRight
                             }
                             ProcessValue {
-                                text: procRow.procCpu
+                                text: procRow.cpu ? (procRow.cpu + "%") : "0%"
                                 Layout.preferredWidth: 42
                                 horizontalAlignment: Text.AlignRight
                             }
                             ProcessValue {
-                                text: procRow.procMem
+                                text: procRow.memory ? (procRow.memory + "%") : "0%"
                                 Layout.preferredWidth: 42
                                 horizontalAlignment: Text.AlignRight
                             }
@@ -229,6 +235,7 @@ Item {
     }
 
     component StatLine: Row {
+        id: statLineRoot
         required property string iconName
         required property color iconColour
         required property string label
@@ -237,14 +244,14 @@ Item {
         spacing: 6
 
         MaterialIcon {
-            iconName: parent.iconName
+            iconName: statLineRoot.iconName
             iconSize: 15
-            iconColour: parent.iconColour
+            iconColour: statLineRoot.iconColour
         }
 
         Text {
             width: 48
-            text: parent.label
+            text: statLineRoot.label
             color: Theme.onSurfaceVariantColour
             font.family: Theme.fontFamily
             font.pixelSize: 11
@@ -252,7 +259,7 @@ Item {
 
         Text {
             width: 78
-            text: parent.value
+            text: statLineRoot.value
             color: Theme.contentColour
             font.family: Theme.fontFamily
             font.pixelSize: 11
