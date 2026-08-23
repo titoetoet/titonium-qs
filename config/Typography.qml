@@ -26,4 +26,7 @@ QtObject {
     readonly property int weightMedium: Font.Medium
     readonly property int weightDemiBold: Font.DemiBold
     readonly property int weightBold: Font.Bold
+
+    // ── Rendering ────────────────────────────────────────────────────────────
+    readonly property int renderType: Text.NativeRendering
 }

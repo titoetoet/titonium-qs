@@ -92,6 +92,7 @@ Rectangle {
                     font.family: Theme.fontFamily
                     font.pixelSize: 11
                     font.weight: workspaceItem.isActive ? Font.Bold : Font.Medium
+                    renderType: Theme.renderType
                 }
 
                 MouseArea {

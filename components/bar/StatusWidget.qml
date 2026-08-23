@@ -26,6 +26,7 @@ Item {
             font.family: Theme.fontFamily
             font.pixelSize: 11
             font.weight: Font.DemiBold
+            renderType: Theme.renderType
         }
     }
 }

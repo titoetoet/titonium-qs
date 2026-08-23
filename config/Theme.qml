@@ -19,6 +19,7 @@ QtObject {
     // ── Typography ───────────────────────────────────────────────────────────
     readonly property string fontFamily: Typography.fontFamily
     readonly property string monoFontFamily: Typography.monoFontFamily
+    readonly property int renderType: Typography.renderType
 
     // ── Bar layout & Metrics proxies ─────────────────────────────────────────
     readonly property int barHeight: Metrics.barHeight

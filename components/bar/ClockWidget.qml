@@ -315,6 +315,7 @@ Item {
             font.family: Theme.fontFamily
             font.pixelSize: 13
             font.weight: Font.DemiBold
+            renderType: Theme.renderType
         }
 
         MouseArea {

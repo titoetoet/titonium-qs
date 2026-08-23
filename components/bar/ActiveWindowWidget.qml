@@ -185,6 +185,7 @@ Item {
                     font.family: Typography.fontFamily
                     font.pixelSize: Typography.sizeBodySm
                     font.weight: Typography.weightDemiBold
+                    renderType: Theme.renderType
                 }
             }
 
