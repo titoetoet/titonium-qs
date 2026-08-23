@@ -1,0 +1,12 @@
+module ColeShell.Bar
+ActiveWindowWidget 1.0 ActiveWindowWidget.qml
+WorkspaceWidget 1.0 WorkspaceWidget.qml
+StatusWidget 1.0 StatusWidget.qml
+WifiWidget 1.0 WifiWidget.qml
+NotificationWidget 1.0 NotificationWidget.qml
+ClockWidget 1.0 ClockWidget.qml
+AudioWidget 1.0 AudioWidget.qml
+BluetoothWidget 1.0 BluetoothWidget.qml
+LauncherWidget 1.0 LauncherWidget.qml
+MonitorWidget 1.0 MonitorWidget.qml
+MediaWidget 1.0 MediaWidget.qml

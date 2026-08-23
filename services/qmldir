@@ -1,0 +1,12 @@
+module Services
+singleton ActiveWindowService 1.0 ActiveWindowService.qml
+singleton AudioService 1.0 AudioService.qml
+singleton WeatherService 1.0 WeatherService.qml
+singleton SystemStatusService 1.0 SystemStatusService.qml
+singleton NetworkService 1.0 NetworkService.qml
+singleton SystemInfoService 1.0 SystemInfoService.qml
+singleton NotificationService 1.0 NotificationService.qml
+singleton WindowSwitcherService 1.0 WindowSwitcherService.qml
+singleton SpotlightService 1.0 SpotlightService.qml
+singleton ClipboardService 1.0 ClipboardService.qml
+singleton SettingsService 1.0 SettingsService.qml

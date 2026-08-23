@@ -1,0 +1,3 @@
+module ColeShell.Themes
+singleton Dark 1.0 dark.qml
+singleton Light 1.0 light.qml

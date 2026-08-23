@@ -1,0 +1,3 @@
+module ColeShell.Popups
+PopupPanel 1.0 PopupPanel.qml
+BarDropdown 1.0 BarDropdown.qml
