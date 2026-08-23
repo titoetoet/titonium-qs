@@ -85,7 +85,9 @@ Variants {
                         id: windowItem
 
                         required property Toplevel modelData
-                        readonly property bool selected: WindowSwitcherService.selectedToplevel === modelData
+                        readonly property bool hasModel: windowItem.modelData !== null && windowItem.modelData !== undefined
+                        readonly property bool selected: windowItem.hasModel && WindowSwitcherService.selectedToplevel === windowItem.modelData
+                        readonly property string winTitle: windowItem.hasModel ? (windowItem.modelData.title || windowItem.modelData.appId || "Untitled window") : "Untitled window"
 
                         width: windowGrid.cellWidth
                         height: windowGrid.cellHeight
@@ -150,7 +152,7 @@ Variants {
                                         width: parent.width - 23
                                         anchors.verticalCenter: parent.verticalCenter
                                         elide: Text.ElideRight
-                                        text: windowItem.modelData.title || windowItem.modelData.appId || "Untitled window"
+                                        text: windowItem.winTitle
                                         color: Theme.contentColour
                                         font.pixelSize: 11
                                         font.weight: windowItem.selected ? Font.DemiBold : Font.Normal
@@ -163,10 +165,15 @@ Variants {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onEntered: WindowSwitcherService.selectedToplevel = windowItem.modelData
+                            onEntered: {
+                                if (windowItem.hasModel)
+                                    WindowSwitcherService.selectedToplevel = windowItem.modelData;
+                            }
                             onClicked: {
-                                WindowSwitcherService.selectedToplevel = windowItem.modelData;
-                                WindowSwitcherService.accept();
+                                if (windowItem.hasModel) {
+                                    WindowSwitcherService.selectedToplevel = windowItem.modelData;
+                                    WindowSwitcherService.accept();
+                                }
                             }
                         }
                     }

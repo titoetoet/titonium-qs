@@ -565,11 +565,17 @@ Variants {
                                 required property int index
 
                                 readonly property Notification notification: card.modelData
-                                readonly property bool critical: notification.urgency === NotificationUrgency.Critical
-                                readonly property string appLabel: notification.appName || "Unknown application"
-                                readonly property string iconSource: notification.appIcon
-                                    ? Quickshell.iconPath(notification.appIcon, "dialog-information-symbolic")
+                                readonly property bool hasNotif: card.notification !== null && card.notification !== undefined
+                                readonly property bool critical: card.hasNotif && (card.notification.urgency === NotificationUrgency.Critical)
+                                readonly property string appLabel: card.hasNotif && card.notification.appName ? card.notification.appName : "Unknown application"
+                                readonly property string iconSource: card.hasNotif && card.notification.appIcon
+                                    ? Quickshell.iconPath(card.notification.appIcon, "dialog-information-symbolic")
                                     : Quickshell.iconPath("dialog-information-symbolic")
+                                readonly property string notifSummary: card.hasNotif && card.notification.summary ? card.notification.summary : ""
+                                readonly property string notifBody: card.hasNotif && card.notification.body ? card.notification.body : ""
+                                readonly property string notifImage: card.hasNotif && card.notification.image ? card.notification.image : ""
+                                readonly property var notifActions: card.hasNotif && card.notification.actions ? card.notification.actions : []
+                                readonly property bool notifHasInlineReply: card.hasNotif && (card.notification.hasInlineReply ?? false)
 
                                 Layout.fillWidth: true
                                 Layout.leftMargin: 12; Layout.rightMargin: 12
@@ -585,7 +591,7 @@ Variants {
                                     width: 3
                                     radius: 2
                                     color: card.critical ? Theme.accentColour
-                                        : notification.urgency === NotificationUrgency.Low
+                                        : (card.hasNotif && card.notification.urgency === NotificationUrgency.Low)
                                             ? Qt.alpha(Theme.onSurfaceVariantColour, 0.35)
                                             : Theme.downloadIconColour
                                 }
@@ -626,7 +632,7 @@ Variants {
                                         }
 
                                         Text {
-                                            text: formatRelative(NotificationService.receivedTime(card.notification.id), viewClock.date)
+                                            text: card.hasNotif ? formatRelative(NotificationService.receivedTime(card.notification.id), viewClock.date) : ""
                                             color: Theme.onSurfaceVariantColour
                                             font.pixelSize: 10
                                         }
@@ -647,14 +653,17 @@ Variants {
                                                 anchors.fill: parent
                                                 hoverEnabled: true
                                                 cursorShape: Qt.PointingHandCursor
-                                                onClicked: card.notification.dismiss()
+                                                onClicked: {
+                                                    if (card.hasNotif && typeof card.notification.dismiss === "function")
+                                                        card.notification.dismiss();
+                                                }
                                             }
                                         }
                                     }
 
                                     Text {
                                         Layout.fillWidth: true
-                                        text: card.notification.summary
+                                        text: card.notifSummary
                                         color: Theme.contentColour
                                         font.pixelSize: 12; font.weight: Font.Medium
                                         elide: Text.ElideRight
@@ -663,7 +672,7 @@ Variants {
 
                                     Text {
                                         Layout.fillWidth: true
-                                        text: card.notification.body
+                                        text: card.notifBody
                                         color: Theme.onSurfaceVariantColour
                                         font.pixelSize: 11
                                         wrapMode: Text.WordWrap
@@ -677,23 +686,25 @@ Variants {
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 120
                                         fillMode: Image.PreserveAspectFit
-                                        source: card.notification.image
-                                        visible: card.notification.image.length > 0
+                                        source: card.notifImage
+                                        visible: card.notifImage.length > 0
                                     }
 
                                     // Action buttons
                                     Flow {
                                         Layout.fillWidth: true
-                                        visible: card.notification.actions.length > 0
+                                        visible: card.notifActions.length > 0
                                         spacing: 6
 
                                         Repeater {
-                                            model: card.notification.actions
+                                            model: card.notifActions
 
                                             delegate: Rectangle {
                                                 id: actionBtn
 
                                                 required property NotificationAction modelData
+
+                                                readonly property bool hasAction: actionBtn.modelData !== null && actionBtn.modelData !== undefined
 
                                                 implicitHeight: 28
                                                 implicitWidth: actionLabel.implicitWidth + 20
@@ -705,7 +716,7 @@ Variants {
                                                 Text {
                                                     id: actionLabel
                                                     anchors.centerIn: parent
-                                                    text: actionBtn.modelData.text
+                                                    text: actionBtn.hasAction ? (actionBtn.modelData.text || "") : ""
                                                     color: Theme.contentColour
                                                     font.pixelSize: 11
                                                 }
@@ -715,7 +726,10 @@ Variants {
                                                     anchors.fill: parent
                                                     hoverEnabled: true
                                                     cursorShape: Qt.PointingHandCursor
-                                                    onClicked: actionBtn.modelData.invoke()
+                                                    onClicked: {
+                                                        if (actionBtn.hasAction && typeof actionBtn.modelData.invoke === "function")
+                                                            actionBtn.modelData.invoke();
+                                                    }
                                                 }
                                             }
                                         }
@@ -724,7 +738,7 @@ Variants {
                                     // Inline reply
                                     RowLayout {
                                         Layout.fillWidth: true
-                                        visible: card.notification.hasInlineReply
+                                        visible: card.notifHasInlineReply
                                         spacing: 6
 
                                         Rectangle {

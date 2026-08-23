@@ -95,13 +95,19 @@ Item {
 
             required property Toplevel modelData
 
+            readonly property bool hasModel: taskItem.modelData !== null && taskItem.modelData !== undefined
+            readonly property string appClass: hasModel ? (taskItem.modelData.appId || "") : ""
+            readonly property string appTitleText: hasModel ? (taskItem.modelData.title || taskItem.modelData.appId || "Untitled") : "Untitled"
+
             // Resilient active check combining ToplevelManager and ActiveWindowService (Hyprland IPC)
-            readonly property bool isActive: modelData.active
-                || ToplevelManager.activeToplevel === modelData
+            readonly property bool isActive: hasModel && (
+                taskItem.modelData.active
+                || ToplevelManager.activeToplevel === taskItem.modelData
                 || (ActiveWindowService.valid && (
-                    (modelData.appId && ActiveWindowService.appClass && modelData.appId.toLowerCase() === ActiveWindowService.appClass.toLowerCase())
-                    || (modelData.title && ActiveWindowService.title && modelData.title === ActiveWindowService.title)
+                    (taskItem.appClass && ActiveWindowService.appClass && taskItem.appClass.toLowerCase() === ActiveWindowService.appClass.toLowerCase())
+                    || (taskItem.modelData.title && ActiveWindowService.title && taskItem.modelData.title === ActiveWindowService.title)
                 ))
+            )
 
             // Dynamic width: Active window expands with title, others remain compact circle pill
             implicitWidth: taskItem.isActive
@@ -148,7 +154,7 @@ Item {
                     Image {
                         id: appIcon
                         anchors.fill: parent
-                        source: root.getAppIcon(taskItem.modelData.appId || "")
+                        source: root.getAppIcon(taskItem.appClass)
                         sourceSize.width: 48
                         sourceSize.height: 48
                         fillMode: Image.PreserveAspectFit
@@ -174,7 +180,7 @@ Item {
                     Layout.maximumWidth: 210
                     Layout.alignment: Qt.AlignVCenter
                     elide: Text.ElideRight
-                    text: taskItem.modelData.title || taskItem.modelData.appId || "Untitled"
+                    text: taskItem.appTitleText
                     color: Theme.textPrimary
                     font.family: Typography.fontFamily
                     font.pixelSize: Typography.sizeBodySm
@@ -188,11 +194,14 @@ Item {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: taskItem.modelData.activate()
+                onClicked: {
+                    if (taskItem.hasModel && typeof taskItem.modelData.activate === "function")
+                        taskItem.modelData.activate();
+                }
             }
 
             Accessible.role: Accessible.Button
-            Accessible.name: taskItem.modelData.title || taskItem.modelData.appId || "Window"
+            Accessible.name: taskItem.appTitleText
         }
     }
 }

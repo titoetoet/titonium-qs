@@ -160,25 +160,32 @@ Item {
                         model: root.processes
 
                         RowLayout {
+                            id: procRow
                             required property var modelData
+
+                            readonly property bool hasProc: procRow.modelData !== null && procRow.modelData !== undefined
+                            readonly property string procPid: procRow.hasProc && procRow.modelData.pid ? String(procRow.modelData.pid) : ""
+                            readonly property string procName: procRow.hasProc && procRow.modelData.name ? String(procRow.modelData.name) : ""
+                            readonly property string procCpu: procRow.hasProc && procRow.modelData.cpu !== undefined ? (procRow.modelData.cpu + "%") : "0%"
+                            readonly property string procMem: procRow.hasProc && procRow.modelData.memory !== undefined ? (procRow.modelData.memory + "%") : "0%"
 
                             Layout.fillWidth: true
                             Layout.preferredHeight: 13
                             spacing: 6
 
-                            ProcessValue { text: modelData.pid; Layout.preferredWidth: 46 }
+                            ProcessValue { text: procRow.procPid; Layout.preferredWidth: 46 }
                             ProcessValue {
-                                text: modelData.name
+                                text: procRow.procName
                                 Layout.fillWidth: true
                                 elide: Text.ElideRight
                             }
                             ProcessValue {
-                                text: modelData.cpu + "%"
+                                text: procRow.procCpu
                                 Layout.preferredWidth: 42
                                 horizontalAlignment: Text.AlignRight
                             }
                             ProcessValue {
-                                text: modelData.memory + "%"
+                                text: procRow.procMem
                                 Layout.preferredWidth: 42
                                 horizontalAlignment: Text.AlignRight
                             }

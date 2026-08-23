@@ -38,11 +38,16 @@ Item {
                 model: AudioService.sinks
 
                 DeviceButton {
+                    id: sinkBtn
                     required property PwNode modelData
+                    readonly property bool hasNode: sinkBtn.modelData !== null && sinkBtn.modelData !== undefined
                     Layout.fillWidth: true
-                    label: modelData.description || modelData.name
-                    checked: AudioService.sink?.id === modelData.id
-                    onTriggered: AudioService.setSink(modelData)
+                    label: sinkBtn.hasNode ? (sinkBtn.modelData.description || sinkBtn.modelData.name || "Default Output") : "Default Output"
+                    checked: sinkBtn.hasNode && AudioService.sink !== null && AudioService.sink.id === sinkBtn.modelData.id
+                    onTriggered: {
+                        if (sinkBtn.hasNode)
+                            AudioService.setSink(sinkBtn.modelData);
+                    }
                 }
             }
 
@@ -55,11 +60,16 @@ Item {
                 model: AudioService.sources
 
                 DeviceButton {
+                    id: srcBtn
                     required property PwNode modelData
+                    readonly property bool hasNode: srcBtn.modelData !== null && srcBtn.modelData !== undefined
                     Layout.fillWidth: true
-                    label: modelData.description || modelData.name
-                    checked: AudioService.source?.id === modelData.id
-                    onTriggered: AudioService.setSource(modelData)
+                    label: srcBtn.hasNode ? (srcBtn.modelData.description || srcBtn.modelData.name || "Default Input") : "Default Input"
+                    checked: srcBtn.hasNode && AudioService.source !== null && AudioService.source.id === srcBtn.modelData.id
+                    onTriggered: {
+                        if (srcBtn.hasNode)
+                            AudioService.setSource(srcBtn.modelData);
+                    }
                 }
             }
 

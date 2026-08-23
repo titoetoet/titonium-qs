@@ -376,6 +376,12 @@ Rectangle {
                             required property var modelData
                             required property int index
 
+                            readonly property var presetData: presetBtn.modelData
+                            readonly property bool hasData: presetData !== null && presetData !== undefined
+                            readonly property string presetIcon: (hasData && presetData.icon) ? String(presetData.icon) : "person"
+                            readonly property string presetLabel: (hasData && presetData.label) ? String(presetData.label) : ""
+                            readonly property bool isSelected: hasData && (SettingsService.avatarIcon === presetData.icon)
+
                             width: 96
                             height: 52
                             radius: Metrics.radiusMd
@@ -385,22 +391,20 @@ Rectangle {
                             border.width: isSelected ? 1.5 : 1
                             border.color: isSelected ? Theme.accentColour : Theme.borderSubtle
 
-                            readonly property bool isSelected: SettingsService.avatarIcon === modelData.icon
-
                             ColumnLayout {
                                 anchors.centerIn: parent
                                 spacing: 2
 
                                 MaterialIcon {
                                     Layout.alignment: Qt.AlignHCenter
-                                    iconName: presetBtn.modelData.icon
+                                    iconName: presetBtn.presetIcon
                                     iconSize: 22
                                     iconColour: presetBtn.isSelected ? Theme.accentColour : Theme.textPrimary
                                 }
 
                                 Text {
                                     Layout.alignment: Qt.AlignHCenter
-                                    text: presetBtn.modelData.label
+                                    text: presetBtn.presetLabel
                                     color: presetBtn.isSelected ? Theme.accentColour : Theme.textSecondary
                                     font.family: Typography.fontFamily
                                     font.pixelSize: Typography.sizeMicro
@@ -414,8 +418,10 @@ Rectangle {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    SettingsService.setAvatarIcon(presetBtn.modelData.icon);
-                                    root.choosingAvatar = false;
+                                    if (presetBtn.hasData) {
+                                        SettingsService.setAvatarIcon(presetBtn.presetIcon);
+                                        root.choosingAvatar = false;
+                                    }
                                 }
                             }
                         }

@@ -84,6 +84,20 @@ Variants {
                     required property var modelData
                     required property int index
 
+                    readonly property var notif: card.modelData
+                    readonly property bool hasNotif: card.notif !== null && card.notif !== undefined
+                    readonly property string appIconSrc: (card.hasNotif && card.notif.appIcon)
+                        ? Quickshell.iconPath(card.notif.appIcon, "application-x-executable")
+                        : Quickshell.iconPath("application-x-executable")
+                    readonly property string appNameText: (card.hasNotif && card.notif.appName)
+                        ? card.notif.appName.toUpperCase()
+                        : "NOTIFICATION"
+                    readonly property string notifSummary: (card.hasNotif && card.notif.summary) ? card.notif.summary : ""
+                    readonly property string notifBody: {
+                        if (!card.hasNotif || !card.notif.body) return "";
+                        return String(card.notif.body).replace(/\n+/g, " ").trim();
+                    }
+
                     width: 350
                     height: content.implicitHeight + 20
                     radius: Metrics.radiusCard
@@ -106,8 +120,8 @@ Variants {
                         interval: popupWindow.toastTimeout
                         running: true
                         onTriggered: {
-                            if (card.modelData)
-                                popupWindow.removeToast(card.modelData.id, false);
+                            if (card.hasNotif && card.notif.id)
+                                popupWindow.removeToast(card.notif.id, false);
                         }
                     }
 
@@ -129,9 +143,7 @@ Variants {
                             Image {
                                 Layout.preferredWidth: 20
                                 Layout.preferredHeight: 20
-                                source: card.modelData && card.modelData.appIcon
-                                    ? Quickshell.iconPath(card.modelData.appIcon, "application-x-executable")
-                                    : Quickshell.iconPath("application-x-executable")
+                                source: card.appIconSrc
                                 sourceSize.width: 20
                                 sourceSize.height: 20
                                 fillMode: Image.PreserveAspectFit
@@ -147,9 +159,7 @@ Variants {
 
                             Text {
                                 Layout.fillWidth: true
-                                text: card.modelData && card.modelData.appName
-                                    ? card.modelData.appName.toUpperCase()
-                                    : "NOTIFICATION"
+                                text: card.appNameText
                                 color: Theme.textSecondary
                                 font.family: Typography.fontFamily
                                 font.pixelSize: Typography.sizeMicro
@@ -178,8 +188,8 @@ Variants {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        if (card.modelData)
-                                            popupWindow.removeToast(card.modelData.id, true);
+                                        if (card.hasNotif && card.notif.id)
+                                            popupWindow.removeToast(card.notif.id, true);
                                     }
                                 }
                             }
@@ -188,7 +198,7 @@ Variants {
                         // Summary (Title) — strictly single line
                         Text {
                             Layout.fillWidth: true
-                            text: card.modelData ? card.modelData.summary : ""
+                            text: card.notifSummary
                             color: Theme.textPrimary
                             font.family: Typography.fontFamily
                             font.pixelSize: Typography.sizeBody
@@ -201,10 +211,7 @@ Variants {
                         // Body (Message preview) — first line snippet only
                         Text {
                             Layout.fillWidth: true
-                            text: {
-                                if (!card.modelData || !card.modelData.body) return "";
-                                return card.modelData.body.replace(/\n+/g, " ").trim();
-                            }
+                            text: card.notifBody
                             color: Theme.textSecondary
                             font.family: Typography.fontFamily
                             font.pixelSize: Typography.sizeCaption

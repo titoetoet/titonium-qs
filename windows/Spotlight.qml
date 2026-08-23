@@ -271,6 +271,13 @@ Variants {
                             required property var modelData
                             required property int index
 
+                            readonly property var itemData: clipItemDelegate.modelData
+                            readonly property bool hasData: itemData !== null && itemData !== undefined
+                            readonly property string itemColorHex: (hasData && itemData.colorHex) ? String(itemData.colorHex) : ""
+                            readonly property string itemIcon: (hasData && itemData.icon) ? String(itemData.icon) : "content_paste"
+                            readonly property string itemTitle: (hasData && itemData.title) ? String(itemData.title) : ""
+                            readonly property string itemSubtitle: (hasData && itemData.subtitle) ? String(itemData.subtitle) : ""
+
                             readonly property bool isSelected: SpotlightService.selectedIndex === clipItemDelegate.index
 
                             width: clipListView.width
@@ -309,8 +316,8 @@ Variants {
                                         Rectangle {
                                             anchors.fill: parent
                                             radius: Metrics.radiusSm
-                                            visible: clipItemDelegate.modelData.colorHex !== undefined && clipItemDelegate.modelData.colorHex.length > 0
-                                            color: clipItemDelegate.modelData.colorHex || "transparent"
+                                            visible: clipItemDelegate.itemColorHex.length > 0
+                                            color: clipItemDelegate.itemColorHex.length > 0 ? clipItemDelegate.itemColorHex : "transparent"
                                             border.width: 1
                                             border.color: Theme.borderDefault
                                         }
@@ -318,12 +325,12 @@ Variants {
                                         Rectangle {
                                             anchors.fill: parent
                                             radius: Metrics.radiusSm
-                                            visible: !clipItemDelegate.modelData.colorHex
+                                            visible: clipItemDelegate.itemColorHex.length === 0
                                             color: clipItemDelegate.isSelected ? Theme.accentColour : Theme.badgeBackground
 
                                             MaterialIcon {
                                                 anchors.centerIn: parent
-                                                iconName: clipItemDelegate.modelData.icon || "content_paste"
+                                                iconName: clipItemDelegate.itemIcon
                                                 iconSize: Metrics.iconMd
                                                 iconColour: clipItemDelegate.isSelected ? (Theme.themeName === "light" ? "#ffffff" : Theme.surfaceColour) : Theme.accentColour
                                             }
@@ -338,7 +345,7 @@ Variants {
 
                                         Text {
                                             Layout.fillWidth: true
-                                            text: clipItemDelegate.modelData.title || ""
+                                            text: clipItemDelegate.itemTitle
                                             color: clipItemDelegate.isSelected ? Theme.accentColour : Theme.textPrimary
                                             font.family: Typography.fontFamily
                                             font.pixelSize: Typography.sizeBodySm
@@ -348,7 +355,7 @@ Variants {
 
                                         Text {
                                             Layout.fillWidth: true
-                                            text: clipItemDelegate.modelData.subtitle || ""
+                                            text: clipItemDelegate.itemSubtitle
                                             color: Theme.textSecondary
                                             font.family: Typography.fontFamily
                                             font.pixelSize: Typography.sizeMicro
@@ -366,7 +373,8 @@ Variants {
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
                                     SpotlightService.selectedIndex = clipItemDelegate.index;
-                                    SpotlightService.executeItem(clipItemDelegate.modelData);
+                                    if (clipItemDelegate.hasData)
+                                        SpotlightService.executeItem(clipItemDelegate.itemData);
                                 }
                             }
                         }
@@ -543,6 +551,14 @@ Variants {
                         required property var modelData
                         required property int index
 
+                        readonly property var itemData: resultItem.modelData
+                        readonly property bool hasData: itemData !== null && itemData !== undefined
+                        readonly property string itemType: (hasData && itemData.type) ? String(itemData.type) : ""
+                        readonly property string itemIcon: (hasData && itemData.icon) ? String(itemData.icon) : "play_arrow"
+                        readonly property string itemTitle: (hasData && itemData.title) ? String(itemData.title) : ""
+                        readonly property string itemSubtitle: (hasData && itemData.subtitle) ? String(itemData.subtitle) : ""
+                        readonly property string itemCategory: (hasData && itemData.category) ? String(itemData.category) : ""
+
                         readonly property bool isSelected: SpotlightService.selectedIndex === resultItem.index
 
                         width: resultsList.width
@@ -581,9 +597,9 @@ Variants {
                                     Image {
                                         id: appIconImage
                                         anchors.fill: parent
-                                        visible: resultItem.modelData.type === "app"
-                                        source: resultItem.modelData.type === "app"
-                                            ? Quickshell.iconPath(resultItem.modelData.icon || "application-x-executable", "application-x-executable")
+                                        visible: resultItem.itemType === "app"
+                                        source: resultItem.itemType === "app"
+                                            ? Quickshell.iconPath(resultItem.itemIcon, "application-x-executable")
                                             : ""
                                         sourceSize.width: 32
                                         sourceSize.height: 32
@@ -592,13 +608,13 @@ Variants {
 
                                     Rectangle {
                                         anchors.fill: parent
-                                        visible: resultItem.modelData.type !== "app"
+                                        visible: resultItem.itemType !== "app"
                                         radius: Metrics.radiusMd
                                         color: resultItem.isSelected ? Theme.accentColour : Theme.badgeBackground
 
                                         MaterialIcon {
                                             anchors.centerIn: parent
-                                            iconName: resultItem.modelData.icon || "play_arrow"
+                                            iconName: resultItem.itemIcon
                                             iconSize: Metrics.iconLg
                                             iconColour: resultItem.isSelected ? (Theme.themeName === "light" ? "#ffffff" : Theme.surfaceColour) : Theme.accentColour
                                         }
@@ -613,7 +629,7 @@ Variants {
 
                                     Text {
                                         Layout.fillWidth: true
-                                        text: resultItem.modelData.title || ""
+                                        text: resultItem.itemTitle
                                         color: resultItem.isSelected ? Theme.accentColour : Theme.textPrimary
                                         font.family: Typography.fontFamily
                                         font.pixelSize: Typography.sizeBody
@@ -623,7 +639,7 @@ Variants {
 
                                     Text {
                                         Layout.fillWidth: true
-                                        text: resultItem.modelData.subtitle || ""
+                                        text: resultItem.itemSubtitle
                                         color: Theme.textSecondary
                                         font.family: Typography.fontFamily
                                         font.pixelSize: Typography.sizeCaption
@@ -634,7 +650,7 @@ Variants {
 
                                 // Category or Action Chip
                                 Rectangle {
-                                    visible: resultItem.modelData.category !== undefined && resultItem.modelData.category.length > 0
+                                    visible: resultItem.itemCategory.length > 0
                                     implicitWidth: catText.implicitWidth + Metrics.marginMd
                                     implicitHeight: 20
                                     radius: Metrics.radiusLg
@@ -643,7 +659,7 @@ Variants {
                                     Text {
                                         id: catText
                                         anchors.centerIn: parent
-                                        text: resultItem.modelData.category || ""
+                                        text: resultItem.itemCategory
                                         color: Theme.textSecondary
                                         font.family: Typography.fontFamily
                                         font.pixelSize: Typography.sizeMicro
@@ -676,7 +692,8 @@ Variants {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 SpotlightService.selectedIndex = resultItem.index;
-                                SpotlightService.executeItem(resultItem.modelData);
+                                if (resultItem.hasData)
+                                    SpotlightService.executeItem(resultItem.itemData);
                             }
                         }
                     }

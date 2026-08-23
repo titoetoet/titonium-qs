@@ -130,10 +130,16 @@ Item {
 
                     required property var device
 
+                    readonly property bool hasDev: deviceRow.device !== null && deviceRow.device !== undefined
+                    readonly property bool isConn: hasDev && (deviceRow.device.connected ?? false)
+                    readonly property string devIcon: hasDev && deviceRow.device.icon ? deviceRow.device.icon : ""
+                    readonly property string devName: hasDev ? (deviceRow.device.name || "Unknown device") : ""
+                    readonly property var devState: hasDev ? deviceRow.device.state : null
+
                     Layout.fillWidth: true
                     implicitHeight: 40
                     radius: 16
-                    color: device.connected
+                    color: isConn
                         ? Qt.tint(Theme.surfaceContainerColour, Qt.alpha(Theme.contentColour, 0.12))
                         : pointer.containsMouse
                             ? Qt.tint(Theme.surfaceContainerColour, Qt.alpha(Theme.contentColour, 0.12))
@@ -148,7 +154,7 @@ Item {
                         spacing: 8
 
                         MaterialIcon {
-                            iconName: deviceRow.device.icon.indexOf("head") >= 0
+                            iconName: deviceRow.devIcon.indexOf("head") >= 0
                                 ? "headphones" : "bluetooth"
                             iconSize: 18
                             iconColour: Theme.contentColour
@@ -157,22 +163,22 @@ Item {
                         Text {
                             Layout.fillWidth: true
                             elide: Text.ElideRight
-                            text: deviceRow.device.name
+                            text: deviceRow.devName
                             color: Theme.contentColour
                             font.pixelSize: 11
                         }
 
                         MaterialIcon {
-                            iconName: deviceRow.device.connected ? "link_off" : "link"
+                            iconName: deviceRow.isConn ? "link_off" : "link"
                             iconSize: 17
-                            iconColour: deviceRow.device.connected
+                            iconColour: deviceRow.isConn
                                 ? Theme.accentColour : Theme.contentColour
                         }
 
                         Text {
-                            visible: deviceRow.device.state === BluetoothDeviceState.Connecting
-                                || deviceRow.device.state === BluetoothDeviceState.Disconnecting
-                            text: deviceRow.device.state === BluetoothDeviceState.Connecting
+                            visible: deviceRow.devState === BluetoothDeviceState.Connecting
+                                || deviceRow.devState === BluetoothDeviceState.Disconnecting
+                            text: deviceRow.devState === BluetoothDeviceState.Connecting
                                 ? "Connecting…" : "Disconnecting…"
                             color: Theme.onSurfaceVariantColour
                             font.pixelSize: 10
@@ -182,11 +188,15 @@ Item {
                     MouseArea {
                         id: pointer
                         anchors.fill: parent
-                        enabled: deviceRow.device.state !== BluetoothDeviceState.Connecting
-                            && deviceRow.device.state !== BluetoothDeviceState.Disconnecting
+                        enabled: deviceRow.hasDev
+                            && deviceRow.devState !== BluetoothDeviceState.Connecting
+                            && deviceRow.devState !== BluetoothDeviceState.Disconnecting
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: deviceRow.device.connected = !deviceRow.device.connected
+                        onClicked: {
+                            if (deviceRow.hasDev)
+                                deviceRow.device.connected = !deviceRow.device.connected;
+                        }
                     }
                 }
             }

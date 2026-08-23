@@ -175,14 +175,14 @@ Item {
                         }
 
                         MaterialIcon {
-                            visible: networkRow.security.length > 0
+                            visible: networkRow.security !== undefined && networkRow.security !== null && networkRow.security.length > 0
                             iconName: "lock"
                             iconSize: 14
                             iconColour: Theme.onSurfaceVariantColour
                         }
 
                         Text {
-                            visible: networkRow.active
+                            visible: networkRow.active ?? false
                             text: "Connected"
                             color: Theme.accentColour
                             font.pixelSize: 10
@@ -197,7 +197,10 @@ Item {
                         enabled: NetworkService.enabled && !networkRow.active
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: NetworkService.connect(networkRow.ssid)
+                        onClicked: {
+                            if (networkRow.ssid)
+                                NetworkService.connect(networkRow.ssid);
+                        }
                     }
                 }
             }
