@@ -21,7 +21,7 @@ Singleton {
 
         if (Pipewire && Pipewire.nodes && Pipewire.nodes.values) {
             for (const node of Pipewire.nodes.values) {
-                if (!node || !node.ready || node.isStream || !node.audio)
+                if (!node || node.isStream || !node.audio)
                     continue;
                 if (node.isSink)
                     nextSinks.push(node);
@@ -50,7 +50,7 @@ Singleton {
     }
 
     function setVolume(value: real): void {
-        if (!sink?.ready || !sink.audio)
+        if (!sink || !sink.audio)
             return;
         sink.audio.volume = Math.max(0, Math.min(1, value));
     }
@@ -61,12 +61,12 @@ Singleton {
     }
 
     function setSink(node: PwNode): void {
-        if (node && node.ready)
+        if (node)
             Pipewire.preferredDefaultAudioSink = node;
     }
 
     function setSource(node: PwNode): void {
-        if (node && node.ready)
+        if (node)
             Pipewire.preferredDefaultAudioSource = node;
     }
 
@@ -80,6 +80,6 @@ Singleton {
     }
 
     PwObjectTracker {
-        objects: [root.sink, root.source, ...root.sinks, ...root.sources].filter(node => node && node.ready)
+        objects: [root.sink, root.source, ...root.sinks, ...root.sources].filter(node => node !== null && node !== undefined)
     }
 }
