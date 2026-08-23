@@ -52,6 +52,7 @@ Singleton {
     property var receivedAt: ({})
 
     function track(notification): void {
+        if (!notification || !notification.id) return;
         notification.tracked = true;
         receivedAt[notification.id] = Date.now();
 

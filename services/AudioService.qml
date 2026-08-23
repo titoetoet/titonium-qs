@@ -19,13 +19,15 @@ Singleton {
         const nextSinks = [];
         const nextSources = [];
 
-        for (const node of Pipewire.nodes.values) {
-            if (node.isStream || !node.audio)
-                continue;
-            if (node.isSink)
-                nextSinks.push(node);
-            else
-                nextSources.push(node);
+        if (Pipewire && Pipewire.nodes && Pipewire.nodes.values) {
+            for (const node of Pipewire.nodes.values) {
+                if (!node || !node.ready || node.isStream || !node.audio)
+                    continue;
+                if (node.isSink)
+                    nextSinks.push(node);
+                else
+                    nextSources.push(node);
+            }
         }
 
         // Only reassign when membership changes. New array identity forces a
@@ -38,10 +40,10 @@ Singleton {
     }
 
     function sameIds(next: var, current: var): bool {
-        if (next.length !== current.length)
+        if (!next || !current || next.length !== current.length)
             return false;
         for (let i = 0; i < next.length; i++) {
-            if (next[i].id !== current[i].id)
+            if (!next[i] || !current[i] || next[i].id !== current[i].id)
                 return false;
         }
         return true;
@@ -59,11 +61,13 @@ Singleton {
     }
 
     function setSink(node: PwNode): void {
-        Pipewire.preferredDefaultAudioSink = node;
+        if (node && node.ready)
+            Pipewire.preferredDefaultAudioSink = node;
     }
 
     function setSource(node: PwNode): void {
-        Pipewire.preferredDefaultAudioSource = node;
+        if (node && node.ready)
+            Pipewire.preferredDefaultAudioSource = node;
     }
 
     Component.onCompleted: refreshNodes()
@@ -76,6 +80,6 @@ Singleton {
     }
 
     PwObjectTracker {
-        objects: [root.sink, root.source, ...root.sinks, ...root.sources].filter(node => node)
+        objects: [root.sink, root.source, ...root.sinks, ...root.sources].filter(node => node && node.ready)
     }
 }

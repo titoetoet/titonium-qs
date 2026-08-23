@@ -13,7 +13,7 @@ Item {
 
     readonly property Item inputRegion: root
     // Keep natural stable order without reordering
-    readonly property var toplevels: ToplevelManager.toplevels.values.filter(t => !t.minimized)
+    readonly property var toplevels: (ToplevelManager.toplevels?.values ?? []).filter(t => t && !t.minimized)
 
     implicitHeight: Metrics.widgetHeight
     implicitWidth: taskListView.contentWidth

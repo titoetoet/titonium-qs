@@ -44,6 +44,7 @@ Variants {
             target: NotificationService
 
             function onNotificationReceived(notification) {
+                if (!notification || !notification.id) return;
                 const list = [...popupWindow.activeToasts];
                 const exists = list.some(n => n && n.id === notification.id);
                 if (!exists) {

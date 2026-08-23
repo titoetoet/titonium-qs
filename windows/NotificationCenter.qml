@@ -763,7 +763,8 @@ Variants {
                                                 Keys.onEnterPressed: send()
 
                                                 function send(): void {
-                                                    card.notification.sendInlineReply(replyInput.text);
+                                                    if (card.hasNotif && typeof card.notification.sendInlineReply === "function")
+                                                        card.notification.sendInlineReply(replyInput.text);
                                                     replyInput.text = "";
                                                 }
                                             }

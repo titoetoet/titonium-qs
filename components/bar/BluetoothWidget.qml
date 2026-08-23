@@ -18,9 +18,12 @@ Item {
     property ListModel devices: ListModel {}
 
     function refreshDevices(): void {
+        if (!Bluetooth || !Bluetooth.devices || !Bluetooth.devices.values) return;
         const next = [...Bluetooth.devices.values]
-            .sort((a, b) => (b.connected - a.connected)
-                || (b.paired - a.paired) || a.name.localeCompare(b.name))
+            .filter(d => d !== null && d !== undefined)
+            .sort((a, b) => ((b.connected ?? 0) - (a.connected ?? 0))
+                || ((b.paired ?? 0) - (a.paired ?? 0))
+                || String(a.name || "").localeCompare(String(b.name || "")))
             .slice(0, 5);
 
         // Drop rows whose device left the list.
@@ -218,7 +221,7 @@ Item {
         MaterialIcon {
             anchors.centerIn: parent
             iconName: !root.adapter?.enabled ? "bluetooth_disabled"
-                : Bluetooth.devices.values.some(device => device.connected)
+                : (Bluetooth.devices?.values ?? []).some(device => device && device.connected)
                     ? "bluetooth_connected" : "bluetooth"
             iconSize: 19
             iconColour: Theme.contentColour

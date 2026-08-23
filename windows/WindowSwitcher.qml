@@ -122,7 +122,7 @@ Variants {
                                         id: windowCapture
 
                                         anchors.fill: parent
-                                        captureSource: windowItem.modelData
+                                        captureSource: windowItem.hasModel ? windowItem.modelData : null
                                         live: WindowSwitcherService.visible
                                         constraintSize: Qt.size(parent.width, parent.height)
                                         visible: hasContent

@@ -11,8 +11,8 @@ Singleton {
     property bool visible: false
     property var selectedToplevel: null
 
-    readonly property var toplevels: ToplevelManager.toplevels.values
-        .filter(toplevel => !toplevel.minimized)
+    readonly property var toplevels: (ToplevelManager.toplevels?.values ?? [])
+        .filter(toplevel => toplevel && !toplevel.minimized)
 
     function selectRelative(offset: int): void {
         const windows = toplevels;
