@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Effects
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Wayland
 import Quickshell.Services.Notifications
 import "../services"
@@ -32,10 +33,10 @@ Variants {
         anchors.right: true
         color: "transparent"
 
-        // Layer coordinates with TopBar window
+        // Overlay renders above Top layer (TopBar window)
         WlrLayershell.namespace: "titonium-nc"
         WlrLayershell.exclusionMode: ExclusionMode.Ignore
-        WlrLayershell.layer: WlrLayer.Top
+        WlrLayershell.layer: WlrLayer.Overlay
 
         readonly property bool isThisScreenOpen: NotificationService.activeScreen === modelData
 
@@ -1215,6 +1216,12 @@ Variants {
                     }
                 }
             }
+        }
+
+        HyprlandFocusGrab {
+            active: ncWindow.isThisScreenOpen
+            windows: [ncWindow]
+            onCleared: NotificationService.close()
         }
     }
 }
