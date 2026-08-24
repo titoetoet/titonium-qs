@@ -42,6 +42,7 @@ Variants {
         anchors.left: true
         anchors.right: true
 
+        readonly property bool isThisScreenNCOpen: NotificationService.open && NotificationService.activeScreen === modelData
         color: "transparent"
 
         readonly property bool hasOpenPopup: launcherWidget.expanded
@@ -51,6 +52,7 @@ Variants {
             || audioWidget.expanded
             || monitorWidget.expanded
             || clockWidget.expanded
+            || isThisScreenNCOpen
 
         WlrLayershell.namespace: "titonium-topbar"
         WlrLayershell.exclusionMode: ExclusionMode.Ignore

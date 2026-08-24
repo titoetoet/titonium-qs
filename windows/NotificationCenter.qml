@@ -32,10 +32,10 @@ Variants {
         anchors.right: true
         color: "transparent"
 
-        // Overlay renders above Top layer (TopBar window)
+        // Layer coordinates with TopBar window
         WlrLayershell.namespace: "titonium-nc"
         WlrLayershell.exclusionMode: ExclusionMode.Ignore
-        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.layer: WlrLayer.Top
 
         readonly property bool isThisScreenOpen: NotificationService.activeScreen === modelData
 
@@ -55,43 +55,10 @@ Variants {
             }
         }
 
-        // Full-screen input mask. 0×0 when closed so clicks pass through.
-        // When open, catches clicks anywhere; outside the panel dismisses it.
-        mask: Region { item: inputTarget }
-
-        // ── Full-screen Scrim (Dimming Backdrop & Click-Outside Dismiss) ──
-        Rectangle {
-            id: scrimOverlay
-            anchors.fill: parent
-            color: Qt.alpha("#000000", 0.30)
-            opacity: ncWindow.isThisScreenOpen ? 1.0 : 0.0
-            visible: opacity > 0
-
-            Behavior on opacity {
-                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-            }
-        }
-
-        Item {
-            id: inputTarget
-            x: 0
-            y: 0
-            width: ncWindow.isThisScreenOpen ? ncWindow.width : 0
-            height: ncWindow.isThisScreenOpen ? ncWindow.height : 0
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: mouse => {
-                    const point = mapToItem(panelRoot, mouse.x, mouse.y);
-                    const insidePanel = point.x >= 0
-                        && point.x <= panelRoot.width
-                        && point.y >= 0
-                        && point.y <= panelRoot.height;
-
-                    if (!insidePanel)
-                        NotificationService.close();
-                }
-            }
+        // Input mask only covers the drawer itself when open.
+        // Clicks outside seamlessly hit TopBar widgets or TopBar scrim!
+        mask: Region {
+            item: ncWindow.isThisScreenOpen ? panelRoot : null
         }
 
         // ── Panel content ────────────────────────────────────────────────────

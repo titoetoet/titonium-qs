@@ -140,16 +140,16 @@
 
 ---
 
-## 📦 Prerequisites & Dependencies
+## 🛠️ System Requirements & Dependencies
 
-Before running `titonium`, ensure the following packages and fonts are installed (e.g. on **Arch Linux**):
+Before running `titonium`, ensure the following packages and fonts are installed on your system (e.g. on **Arch Linux**):
 
-### 1. Core Shell Engine & Compositor
+### 1. 🖥️ Core Shell Engine & Compositor
 ```bash
 yay -S hyprland quickshell-git qt6-declarative qt6-quick-effects qt6-svg
 ```
 
-### 2. Required System Tools & Services
+### 2. ⚙️ System Utilities & Audio Services
 ```bash
 sudo pacman -S --needed \
     pipewire \
@@ -164,7 +164,7 @@ sudo pacman -S --needed \
     lm_sensors
 ```
 
-### 3. Recommended Typography & Icons
+### 3. 🔤 Curated Typography & Icons
 ```bash
 sudo pacman -S --needed \
     ttf-font-awesome \
@@ -173,48 +173,48 @@ sudo pacman -S --needed \
     noto-fonts-cjk \
     noto-fonts-emoji
 
-# Install SF Pro Display and Material Symbols Rounded for authentic UI rendering
+# Install SF Pro Display and Material Symbols Rounded for pixel-perfect UI rendering
 ```
 
 ---
 
-## 🚀 Installation & Setup
+## ⚡ Quick Start & Installation
 
 1. **Clone the repository**:
    ```bash
    git clone https://github.com/titoetoet/titonium-qs.git ~/.config/quickshell/titonium
    ```
 
-2. **Launch quickshell**:
+2. **Launch titonium shell**:
    ```bash
-   quickshell -p ~/.config/quickshell/titonium
+   qs -n -d -c titonium
    ```
 
-3. **Autostart with Hyprland (`~/.config/hypr/hyprland.conf`)**:
+3. **Autostart with Hyprland (`~/.config/hypr/hyprland.conf` or `hyprland.lua`)**:
    ```ini
-   exec-once = quickshell -p ~/.config/quickshell/titonium
+   exec-once = qs -n -d -c titonium
    ```
 
 ---
 
-## ⌨️ Keybindings
+## ⌨️ Hyprland Keybindings
 
-Add the following shortcuts to your `hyprland.conf` for quick access:
+Add the following shortcuts to your Hyprland configuration for seamless navigation:
 
 ```ini
 # Spotlight Launcher
 bind = SUPER, SPACE, exec, qs -c titonium ipc call spotlight toggle
 bind = SUPER, R, exec, qs -c titonium ipc call spotlight toggle
 
-# Clipboard History (Split-View)
+# Clipboard History (Split-View with live preview)
 bind = SUPER, V, exec, qs -c titonium ipc call spotlight clipboard
 
 # Alt+Tab Window Switcher
-bind = SUPER, TAB, exec, qs -c titonium ipc call windowSwitcher toggle
+bind = SUPER, TAB, exec, qs -c titonium ipc call window-switcher next
 ```
 
 ---
 
-## 📜 License
+## 📄 License
 
-Licensed under the [MIT License](LICENSE).
+Distributed under the [MIT License](LICENSE).
