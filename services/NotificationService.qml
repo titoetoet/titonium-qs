@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Quickshell.Wayland
 import Quickshell.Services.Notifications
 
 Singleton {
@@ -44,7 +45,7 @@ Singleton {
         persistenceSupported: true
     }
 
-    // Persistent storage list: Notifications remain FOREVER in panel
+    // Persistent storage list: Notifications remain in panel
     // until explicitly dismissed by the user (or Clear All).
     property var list: []
     readonly property var notifications: list
@@ -101,6 +102,71 @@ Singleton {
                 }
             } catch (e) {}
         }
+    }
+
+    // ── Focus window & Event Source Routing ─────────────────────────────────
+    function activateAppWindow(appName, desktopEntry, appIcon): void {
+        const candidates = [
+            (desktopEntry || "").toLowerCase().trim(),
+            (appName || "").toLowerCase().trim(),
+            (appIcon || "").toLowerCase().trim()
+        ].filter(s => s.length > 0);
+
+        if (candidates.length === 0) return;
+
+        // 1. Check running Wayland toplevels via ToplevelManager
+        try {
+            const toplevels = ToplevelManager.toplevels?.values ?? [];
+            for (let i = 0; i < toplevels.length; i++) {
+                const tl = toplevels[i];
+                if (!tl) continue;
+                const appId = (tl.appId || "").toLowerCase();
+                const title = (tl.title || "").toLowerCase();
+
+                for (const cand of candidates) {
+                    if ((appId && (appId === cand || appId.includes(cand) || cand.includes(appId)))
+                        || (title && title.includes(cand))) {
+                        tl.activate();
+                        return;
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn("ToplevelManager activation error:", e);
+        }
+
+        // 2. Hyprland IPC fallback: dispatch focuswindow
+        for (const cand of candidates) {
+            const clean = cand.split(".")[0].replace(/[^a-zA-Z0-9_-]/g, "");
+            if (clean) {
+                Quickshell.execDetached(["hyprctl", "dispatch", "focuswindow", clean]);
+                return;
+            }
+        }
+    }
+
+    function invokeAction(notification, action): void {
+        if (!notification) return;
+
+        // 1. Invoke the D-Bus action callback if provided
+        try {
+            if (action && typeof action.invoke === "function") {
+                action.invoke();
+            } else if (notification.defaultAction && typeof notification.defaultAction.invoke === "function") {
+                notification.defaultAction.invoke();
+            }
+        } catch (e) {
+            console.warn("Notification action invoke error:", e);
+        }
+
+        // 2. Bring the originating application window to focus
+        const appName = notification.appName || "";
+        const desktopEntry = notification.desktopEntry || "";
+        const appIcon = notification.appIcon || "";
+        activateAppWindow(appName, desktopEntry, appIcon);
+
+        // 3. Dismiss from active toasts
+        dismiss(notification);
     }
 
     Connections {

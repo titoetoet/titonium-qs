@@ -81,10 +81,13 @@ Item {
         expanded: root.expanded
         collapsedWidth: Theme.widgetHeight
         surfaceWidth: 600
-        surfaceHeight: 465
+        surfaceHeight: monitorContent.implicitHeight + 32
 
         ColumnLayout {
-            anchors.fill: parent
+            id: monitorContent
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
             anchors.margins: 16
             spacing: 12
 
@@ -506,7 +509,6 @@ Item {
             // ── 4. Modern Task Manager / Top Processes Table ─────────────────
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
                 spacing: 4
 
                 // Table Header

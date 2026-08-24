@@ -351,13 +351,26 @@ Variants {
                                         hoverEnabled: true
                                         cursorShape: Qt.PointingHandCursor
                                         onClicked: {
-                                            if (actBtn.modelData && typeof actBtn.modelData.invoke === "function") {
-                                                actBtn.modelData.invoke();
+                                            if (card.hasNotif && actBtn.modelData) {
+                                                NotificationService.invokeAction(card.notif, actBtn.modelData);
                                                 popupWindow.removeToast(card.notif.id, true);
                                             }
                                         }
                                     }
                                 }
+                            }
+                        }
+                    }
+
+                    // Card Body Click Handler (Click card to focus app)
+                    MouseArea {
+                        anchors.fill: parent
+                        z: -1
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (card.hasNotif) {
+                                NotificationService.invokeAction(card.notif, card.notif.defaultAction);
+                                popupWindow.removeToast(card.notif.id, true);
                             }
                         }
                     }

@@ -1175,8 +1175,10 @@ Variants {
                                                     hoverEnabled: true
                                                     cursorShape: Qt.PointingHandCursor
                                                     onClicked: {
-                                                        if (actionBtn.hasAction && typeof actionBtn.modelData.invoke === "function")
-                                                            actionBtn.modelData.invoke();
+                                                        if (actionBtn.hasAction && card.hasNotif) {
+                                                            NotificationService.invokeAction(card.notification, actionBtn.modelData);
+                                                            NotificationService.close();
+                                                        }
                                                     }
                                                 }
                                             }
@@ -1223,6 +1225,19 @@ Variants {
                                             buttonSize: 30
                                             accessibleName: "Send reply"
                                             onTriggered: replyInput.send()
+                                        }
+                                    }
+                                }
+
+                                // Card Body Click Handler (Click card to focus app)
+                                MouseArea {
+                                    anchors.fill: parent
+                                    z: -1
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (card.hasNotif) {
+                                            NotificationService.invokeAction(card.notification, card.notification.defaultAction);
+                                            NotificationService.close();
                                         }
                                     }
                                 }
