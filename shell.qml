@@ -6,7 +6,6 @@ ShellRoot {
     BarExclusionZone {}
     TopBar {}
     WindowSwitcher {}
-    NotificationCenter {}
     NotificationPopup {}
     Spotlight {}
 }

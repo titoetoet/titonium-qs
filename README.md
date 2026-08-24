@@ -35,9 +35,9 @@
 ## ✨ Key Features
 
 ### 🖥️ 1. Screen Frame & TopBar
-- **Screen Frame (`ScreenFrame.qml`)**: 5px system border with smooth rounded display corners.
-- **TopBar (`TopBar.qml`)**: Floating bar with blur effect, drop shadows, and responsive widget layout.
-- **Single Unified Hyprland Focus Grab**: Eliminates exclusive seat grab lockups, ensuring windows (terminals, browsers, editors) maintain mouse responsiveness.
+- **Screen Frame (`ScreenFrame.qml`)**: 5px system border with smooth rounded display corners, subtle 1px inner bezel contour, and a **1.5px Specular Neon Rim Bar** with dynamic optical refraction gradients (*Cyan/White/Azure in Light Mode, Dracula Blue/Cyan in Dark Mode*).
+- **Unified Single-Window TopBar (`TopBar.qml`)**: Floating bar with blur effect, drop shadows, and responsive widget layout.
+- **Instant 1-Click Zero-Re-Dimm Switching**: All topbar widgets, dropdowns, and Notification Center live within a single Wayland LayerShell surface with unified focus grabbing and shared backdrop dimming, enabling seamless 1-click switching without screen re-dimming.
 - **Workspace Switcher (`WorkspaceWidget.qml`)**: 5-cell workspace indicator synchronized across Hyprland outputs.
 - **Active Window Badge (`ActiveWindowWidget.qml`)**: Truncated active application title with hover inspection card.
 - **System Monitoring Dropdown (`MonitorWidget.qml`)**: Real-time CPU, GPU, RAM, Temperature, and Load Average.
@@ -52,17 +52,17 @@
 ### 🔔 2. Notification System (D-Bus `org.freedesktop.Notifications`)
 
 #### 🗂️ Dynamic Slide-Push Toast Stack (`NotificationPopup.qml`):
-- **Top-Right Default Position**: Floating toast cards docked cleanly at the top-right corner.
+- **Top-Right Default Position**: Floating toast cards docked cleanly at the top-right corner on `WlrLayer.Overlay`.
 - **Dynamic Slide-Push Effect**: When the Notification Center drawer opens, floating toasts **automatically glide 375px to the left** with a smooth `250ms Easing.OutCubic` curve, avoiding any visual overlap, and slide back when the drawer closes.
-- **Multi-Monitor Overlay**: Independent notification layer per display output (`WlrLayershell.Overlay`).
-- **Decluttered Layout**: Removed heavy thumbnail images for a streamlined, compact card aesthetic.
+- **Multi-Monitor Overlay**: Independent notification layer per display output.
 - **Toast Stack**: Stack up to 4 concurrent cards with individual 5-second auto-hide countdown timers.
 - **Independent Dismissal**: Click **`✕`** to dismiss individual toasts immediately.
 
-#### 📋 Notification Center & Live Hub (`NotificationCenter.qml`):
-- **Slide-in Notification Drawer**: Multi-screen side drawer with tabbed interface (`Today` and `Notifications`).
+#### 📋 Unified Notification Hub & Drawer (`NotificationWidget.qml`):
+- **Unified Side Drawer**: Multi-screen side drawer embedded directly inside TopBar with tabbed interface (`Today` and `Notifications`).
+- **Calendar with Lunar Date (Âm Lịch)**: Astronomical solar-to-lunar conversion with special golden/pink highlights for Mùng 1 & Rằm 15.
 - **Live Google News Section (`NewsService.qml`)**: Real-time headlines across multiple topics (*Tech*, *Nation*, *Sports*, *World*) with auto-locale feed URL switching and relative timestamps.
-- **Daily Lunar Wisdom (`LunarService.qml`)**: Dual-language philosophical quotes integrated with astronomical solar-to-lunar date conversion and lunar phase detection.
+- **Daily Lunar Wisdom (`LunarService.qml`)**: Dual-language philosophical quotes (Vietnamese & English).
 - **Permanent Retention**: Notifications remain stored in the panel until explicitly cleared.
 - **Auto-Tab Switch**: Automatically opens directly into the `Notifications` tab when unread items exist.
 - **TopBar Unread Indicator Dot**: Amber/Rose accent dot on the bell icon for unread notifications.

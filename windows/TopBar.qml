@@ -51,13 +51,13 @@ Variants {
             || audioWidget.expanded
             || monitorWidget.expanded
             || clockWidget.expanded
+            || notificationWidget.expanded
 
         WlrLayershell.namespace: "titonium-topbar"
         WlrLayershell.exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Top
 
         mask: Region {
-            Region { item: scrimInputTarget }
             Region { item: launcherWidget.inputRegion }
             Region { item: workspaceWidget.inputRegion }
             Region { item: activeWindowWidget.inputRegion }
@@ -71,7 +71,7 @@ Variants {
             Region { item: clockWidget.inputRegion }
         }
 
-        // ── Full-screen Scrim (Dimming Backdrop & Click-Outside Dismiss) ──
+        // ── Full-screen Scrim (Dimming Backdrop) ─────────────────────────────
         Rectangle {
             id: scrimOverlay
             anchors.fill: parent
@@ -81,20 +81,6 @@ Variants {
 
             Behavior on opacity {
                 NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
-            }
-        }
-
-        Item {
-            id: scrimInputTarget
-            x: 0
-            y: 0
-            width: window.hasOpenPopup ? window.width : 0
-            height: window.hasOpenPopup ? window.height : 0
-
-            MouseArea {
-                anchors.fill: parent
-                enabled: window.hasOpenPopup
-                onClicked: window.closePopups(null)
             }
         }
 
@@ -218,9 +204,17 @@ Variants {
             anchors.right: clockWidget.left
             anchors.rightMargin: Theme.widgetSpacing
             y: (Theme.barHeight - Theme.widgetHeight) / 2
+            onExpandedChanged: {
+                if (expanded)
+                    window.closePopups(notificationWidget);
+            }
             onToggleRequested: {
-                window.closePopups(notificationWidget);
-                NotificationService.toggle(modelData);
+                if (expanded) {
+                    NotificationService.close();
+                } else {
+                    window.closePopups(notificationWidget);
+                    NotificationService.toggle(modelData);
+                }
             }
         }
 
