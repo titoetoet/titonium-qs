@@ -56,10 +56,27 @@ Variants {
             }
         }
 
-        // Input mask only covers the drawer itself when open.
-        // Clicks outside seamlessly hit TopBar widgets or TopBar scrim!
+        // ── Full-screen Scrim (Dimming Backdrop & 1-Click Outside Dismiss) ──
+        Rectangle {
+            id: scrimOverlay
+            anchors.fill: parent
+            color: Qt.alpha("#000000", 0.35)
+            opacity: ncWindow.isThisScreenOpen ? 1.0 : 0.0
+            visible: opacity > 0
+
+            Behavior on opacity {
+                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                enabled: ncWindow.isThisScreenOpen
+                onClicked: NotificationService.close()
+            }
+        }
+
         mask: Region {
-            item: ncWindow.isThisScreenOpen ? panelRoot : null
+            item: ncWindow.isThisScreenOpen ? scrimOverlay : null
         }
 
         // ── Panel content ────────────────────────────────────────────────────
@@ -1216,12 +1233,6 @@ Variants {
                     }
                 }
             }
-        }
-
-        HyprlandFocusGrab {
-            active: ncWindow.isThisScreenOpen
-            windows: [ncWindow]
-            onCleared: NotificationService.close()
         }
     }
 }
