@@ -44,11 +44,20 @@ Variants {
 
         color: "transparent"
 
+        readonly property bool hasOpenPopup: launcherWidget.expanded
+            || mediaWidget.expanded
+            || wifiWidget.expanded
+            || bluetoothWidget.expanded
+            || audioWidget.expanded
+            || monitorWidget.expanded
+            || clockWidget.expanded
+
         WlrLayershell.namespace: "titonium-topbar"
         WlrLayershell.exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Top
 
         mask: Region {
+            Region { item: scrimInputTarget }
             Region { item: launcherWidget.inputRegion }
             Region { item: workspaceWidget.inputRegion }
             Region { item: activeWindowWidget.inputRegion }
@@ -60,6 +69,33 @@ Variants {
             Region { item: audioWidget.inputRegion }
             Region { item: monitorWidget.inputRegion }
             Region { item: clockWidget.inputRegion }
+        }
+
+        // ── Full-screen Scrim (Dimming Backdrop & Click-Outside Dismiss) ──
+        Rectangle {
+            id: scrimOverlay
+            anchors.fill: parent
+            color: Qt.alpha("#000000", 0.30)
+            opacity: window.hasOpenPopup ? 1.0 : 0.0
+            visible: opacity > 0
+
+            Behavior on opacity {
+                NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+            }
+        }
+
+        Item {
+            id: scrimInputTarget
+            x: 0
+            y: 0
+            width: window.hasOpenPopup ? window.width : 0
+            height: window.hasOpenPopup ? window.height : 0
+
+            MouseArea {
+                anchors.fill: parent
+                enabled: window.hasOpenPopup
+                onClicked: window.closePopups(null)
+            }
         }
 
 
@@ -201,45 +237,9 @@ Variants {
         }
 
         HyprlandFocusGrab {
-            active: launcherWidget.expanded
+            active: window.hasOpenPopup
             windows: [window]
-            onCleared: launcherWidget.expanded = false
-        }
-
-        HyprlandFocusGrab {
-            active: mediaWidget.expanded
-            windows: [window]
-            onCleared: mediaWidget.expanded = false
-        }
-
-        HyprlandFocusGrab {
-            active: wifiWidget.expanded
-            windows: [window]
-            onCleared: wifiWidget.expanded = false
-        }
-
-        HyprlandFocusGrab {
-            active: bluetoothWidget.expanded
-            windows: [window]
-            onCleared: bluetoothWidget.expanded = false
-        }
-
-        HyprlandFocusGrab {
-            active: audioWidget.expanded
-            windows: [window]
-            onCleared: audioWidget.expanded = false
-        }
-
-        HyprlandFocusGrab {
-            active: monitorWidget.expanded
-            windows: [window]
-            onCleared: monitorWidget.expanded = false
-        }
-
-        HyprlandFocusGrab {
-            active: clockWidget.expanded
-            windows: [window]
-            onCleared: clockWidget.expanded = false
+            onCleared: window.closePopups(null)
         }
     }
 }

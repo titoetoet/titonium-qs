@@ -7,46 +7,44 @@ import Quickshell.Services.Pipewire
 Singleton {
     id: root
 
-    property list<PwNode> sinks: []
-    property list<PwNode> sources: []
+    property var sinks: []
+    property var sources: []
 
     readonly property PwNode sink: Pipewire.defaultAudioSink
     readonly property PwNode source: Pipewire.defaultAudioSource
     readonly property real volume: sink?.audio?.volume ?? 0
     readonly property bool muted: sink?.audio?.muted ?? false
+    readonly property int currentSinkId: sink?.id ?? -1
+    readonly property int currentSourceId: source?.id ?? -1
 
     function refreshNodes(): void {
         const nextSinks = [];
         const nextSources = [];
 
-        if (Pipewire && Pipewire.nodes && Pipewire.nodes.values) {
-            for (const node of Pipewire.nodes.values) {
-                if (!node || node.isStream || !node.audio)
-                    continue;
-                if (node.isSink)
-                    nextSinks.push(node);
-                else
-                    nextSources.push(node);
+        try {
+            if (Pipewire && Pipewire.nodes && Pipewire.nodes.values) {
+                const vals = Pipewire.nodes.values;
+                for (let i = 0; i < vals.length; i++) {
+                    const node = vals[i];
+                    if (!node || node.isStream || !node.audio)
+                        continue;
+                    const desc = (node.description || node.name || (node.isSink ? "Output Device" : "Input Device")) + "";
+                    const item = {
+                        id: node.id,
+                        name: (node.name || "") + "",
+                        description: desc,
+                        isSink: Boolean(node.isSink)
+                    };
+                    if (node.isSink)
+                        nextSinks.push(item);
+                    else
+                        nextSources.push(item);
+                }
             }
-        }
+        } catch (e) {}
 
-        // Only reassign when membership changes. New array identity forces a
-        // full Repeater rebuild in AudioWidget, which resets hover state and
-        // makes rows feel like they are dropping mouse input.
-        if (!sameIds(nextSinks, sinks))
-            sinks = nextSinks;
-        if (!sameIds(nextSources, sources))
-            sources = nextSources;
-    }
-
-    function sameIds(next: var, current: var): bool {
-        if (!next || !current || next.length !== current.length)
-            return false;
-        for (let i = 0; i < next.length; i++) {
-            if (!next[i] || !current[i] || next[i].id !== current[i].id)
-                return false;
-        }
-        return true;
+        sinks = nextSinks;
+        sources = nextSources;
     }
 
     function setVolume(value: real): void {
@@ -60,14 +58,38 @@ Singleton {
             sink.audio.muted = !sink.audio.muted;
     }
 
-    function setSink(node: PwNode): void {
-        if (node)
-            Pipewire.preferredDefaultAudioSink = node;
+    function setSink(target: var): void {
+        if (!target) return;
+        const targetId = (typeof target === "object" && target.id !== undefined) ? target.id : target;
+        try {
+            if (Pipewire && Pipewire.nodes && Pipewire.nodes.values) {
+                const vals = Pipewire.nodes.values;
+                for (let i = 0; i < vals.length; i++) {
+                    const node = vals[i];
+                    if (node && node.id === targetId) {
+                        Pipewire.preferredDefaultAudioSink = node;
+                        break;
+                    }
+                }
+            }
+        } catch (e) {}
     }
 
-    function setSource(node: PwNode): void {
-        if (node)
-            Pipewire.preferredDefaultAudioSource = node;
+    function setSource(target: var): void {
+        if (!target) return;
+        const targetId = (typeof target === "object" && target.id !== undefined) ? target.id : target;
+        try {
+            if (Pipewire && Pipewire.nodes && Pipewire.nodes.values) {
+                const vals = Pipewire.nodes.values;
+                for (let i = 0; i < vals.length; i++) {
+                    const node = vals[i];
+                    if (node && node.id === targetId) {
+                        Pipewire.preferredDefaultAudioSource = node;
+                        break;
+                    }
+                }
+            }
+        } catch (e) {}
     }
 
     Component.onCompleted: refreshNodes()
@@ -80,6 +102,6 @@ Singleton {
     }
 
     PwObjectTracker {
-        objects: [root.sink, root.source, ...root.sinks, ...root.sources].filter(node => node !== null && node !== undefined)
+        objects: [root.sink, root.source].filter(node => node !== null && node !== undefined)
     }
 }

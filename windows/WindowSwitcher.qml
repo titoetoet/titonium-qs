@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import "../config"
@@ -61,8 +62,63 @@ Variants {
             anchors.centerIn: parent
             width: Math.min(parent.width - 80, Math.max(320, preferredWidth))
             height: 230
-            radius: Theme.innerRadius
-            color: Theme.surfaceColour
+            // ── Isolated Background & Shadow ──
+            Rectangle {
+                anchors.fill: parent
+                radius: Theme.innerRadius
+                antialiasing: true
+
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: Theme.surfaceColour }
+                    GradientStop { position: 1.0; color: Theme.surfaceColourBottom }
+                }
+
+                border.width: 1
+                border.color: Theme.popupBorder
+
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    shadowEnabled: true
+                    blurMax: 36
+                    shadowBlur: 0.95
+                    shadowVerticalOffset: 12
+                    shadowColor: Theme.popupShadowColour
+                }
+
+                // Layer 1: Top Ambient Diffuse Glow
+                Rectangle {
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.margins: 1
+                    height: 24
+                    radius: Theme.innerRadius - 1
+                    clip: true
+                    gradient: Gradient {
+                        GradientStop { position: 0.0; color: Qt.alpha("#ffffff", Theme.themeName === "light" ? 0.25 : 0.06) }
+                        GradientStop { position: 1.0; color: "transparent" }
+                    }
+                }
+
+                // Layer 2: Horizontal Specular Rim Sheen
+                Rectangle {
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.topMargin: 1
+                    anchors.leftMargin: 8
+                    anchors.rightMargin: 8
+                    height: 1
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+                        GradientStop { position: 0.0; color: "transparent" }
+                        GradientStop { position: 0.2; color: Qt.alpha("#ffffff", Theme.themeName === "light" ? 0.30 : 0.14) }
+                        GradientStop { position: 0.5; color: Qt.alpha("#ffffff", Theme.themeName === "light" ? 0.65 : 0.38) }
+                        GradientStop { position: 0.8; color: Qt.alpha("#ffffff", Theme.themeName === "light" ? 0.30 : 0.14) }
+                        GradientStop { position: 1.0; color: "transparent" }
+                    }
+                }
+            }
 
             ColumnLayout {
                 anchors.fill: parent
@@ -84,7 +140,7 @@ Variants {
                     delegate: Item {
                         id: windowItem
 
-                        required property Toplevel modelData
+                        required property var modelData
                         readonly property bool hasModel: windowItem.modelData !== null && windowItem.modelData !== undefined
                         readonly property bool selected: windowItem.hasModel && WindowSwitcherService.selectedToplevel === windowItem.modelData
                         readonly property string winTitle: windowItem.hasModel ? (windowItem.modelData.title || windowItem.modelData.appId || "Untitled window") : "Untitled window"
@@ -122,8 +178,8 @@ Variants {
                                         id: windowCapture
 
                                         anchors.fill: parent
-                                        captureSource: windowItem.hasModel ? windowItem.modelData : null
-                                        live: WindowSwitcherService.visible
+                                        captureSource: (windowItem.hasModel && windowItem.modelData && typeof windowItem.modelData.title !== "undefined") ? windowItem.modelData : null
+                                        live: WindowSwitcherService.visible && windowCapture.captureSource !== null
                                         constraintSize: Qt.size(parent.width, parent.height)
                                         visible: hasContent
                                     }

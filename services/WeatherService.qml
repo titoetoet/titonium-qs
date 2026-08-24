@@ -24,7 +24,8 @@ Singleton {
     readonly property string temperatureText: Number.isFinite(temperature)
         ? Math.round(temperature) + "°C" : "--°"
     readonly property string description: conditionForCode(weatherCode, loading)
-    readonly property string iconName: iconForCode(weatherCode, isDay)
+    readonly property string iconName: iconForWeather(weatherCode, isDay, temperature, humidity)
+    readonly property color iconColour: colourForWeather(weatherCode, isDay, temperature)
 
     function conditionForCode(code: int, isLoading: bool): string {
         if (code === 0)
@@ -36,11 +37,13 @@ Singleton {
         if (code === 3)
             return "Overcast";
         if (code === 45 || code === 48)
-            return "Fog";
+            return "Foggy";
         if (code >= 51 && code <= 57)
             return "Drizzle";
-        if (code >= 61 && code <= 67)
+        if (code >= 61 && code <= 65)
             return "Rain";
+        if (code >= 66 && code <= 67)
+            return "Freezing rain";
         if (code >= 71 && code <= 77)
             return "Snow";
         if (code >= 80 && code <= 82)
@@ -49,29 +52,83 @@ Singleton {
             return "Snow showers";
         if (code >= 95)
             return "Thunderstorm";
-        return isLoading ? "Updating…" : "No weather";
+        return isLoading ? "Updating…" : "Clear";
     }
 
-    function iconForCode(code: int, daytime: bool): string {
-        if (code === 0)
-            return daytime ? "clear_day" : "clear_night";
-        if (code === 1 || code === 2)
-            return daytime ? "partly_cloudy_day" : "partly_cloudy_night";
-        if (code === 3)
-            return "cloud";
-        if (code === 45 || code === 48)
-            return "foggy";
-        if (code >= 51 && code <= 67)
-            return "rainy";
-        if (code >= 71 && code <= 77)
-            return "weather_snowy";
-        if (code >= 80 && code <= 82)
-            return "rainy";
-        if (code >= 85 && code <= 86)
-            return "weather_snowy";
+    function iconForWeather(code: int, daytime: bool, temp: real, hum: int): string {
+        // Thunderstorm
         if (code >= 95)
             return "thunderstorm";
-        return "cloud_alert";
+
+        // Snow / Freezing
+        if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86) || (Number.isFinite(temp) && temp <= 0))
+            return "ac_unit";
+
+        // Heavy Rain / Showers
+        if (code >= 80 && code <= 82 || code === 65)
+            return "rainy";
+
+        // Rain / Drizzle
+        if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82))
+            return "rainy";
+
+        // Fog
+        if (code === 45 || code === 48)
+            return "foggy";
+
+        // Overcast
+        if (code === 3)
+            return "cloud";
+
+        // High Humidity & warm (mùa nồm / oi bức ẩm ướt)
+        if (hum >= 88 && (code === 1 || code === 2))
+            return "water_drop";
+
+        // Partly cloudy
+        if (code === 1 || code === 2)
+            return daytime ? "partly_cloudy_day" : "partly_cloudy_night";
+
+        // Clear Sun / Night
+        if (code === 0 || code === -1) {
+            if (Number.isFinite(temp) && temp >= 36)
+                return "sunny"; // Extreme heat
+            return daytime ? "sunny" : "bedtime";
+        }
+
+        return daytime ? "sunny" : "bedtime";
+    }
+
+    function colourForWeather(code: int, daytime: bool, temp: real): color {
+        // Thunderstorm -> Dracula Red
+        if (code >= 95)
+            return "#ff5555";
+
+        // Extreme heat ($T >= 35°C$) -> Dracula Red/Orange
+        if (Number.isFinite(temp) && temp >= 35)
+            return "#ff5555";
+
+        // Cold / Snow ($T <= 14°C$) -> Dracula Cyan
+        if ((Number.isFinite(temp) && temp <= 14) || (code >= 71 && code <= 77))
+            return "#8be9fd";
+
+        // Rain / Drizzle -> Dracula Cyan
+        if (code >= 51 && code <= 67 || code >= 80 && code <= 82)
+            return "#8be9fd";
+
+        // Overcast / Fog -> Dracula Comment Blue
+        if (code === 3 || code === 45 || code === 48)
+            return "#6272a4";
+
+        // Partly cloudy -> Dracula Yellow
+        if (code === 1 || code === 2)
+            return daytime ? "#f1fa8c" : "#bd93f9";
+
+        // Clear day -> Dracula Orange
+        if (daytime)
+            return "#ffb86c";
+
+        // Clear night -> Dracula Purple
+        return "#bd93f9";
     }
 
     function reload(): void {

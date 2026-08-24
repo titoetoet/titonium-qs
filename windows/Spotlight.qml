@@ -70,18 +70,58 @@ Variants {
             Rectangle {
                 anchors.fill: parent
                 radius: Metrics.radiusCard
-                color: Theme.surfaceColour
-                border.width: 1
-                border.color: Theme.borderDefault
                 antialiasing: true
+
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: Theme.surfaceColour }
+                    GradientStop { position: 1.0; color: Theme.surfaceColourBottom }
+                }
+
+                border.width: 1
+                border.color: Theme.popupBorder
 
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     shadowEnabled: true
                     blurMax: 32
-                    shadowBlur: 1.2
+                    shadowBlur: 0.65
                     shadowVerticalOffset: 8
                     shadowColor: Theme.popupShadowColour
+                }
+
+                // Layer 1: Top Ambient Caustic Glow (Liquid glass diffusion)
+                Rectangle {
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.margins: 1
+                    height: 28
+                    radius: Metrics.radiusCard - 1
+                    clip: true
+                    gradient: Gradient {
+                        GradientStop { position: 0.0; color: Qt.alpha("#ffffff", Theme.themeName === "light" ? 0.28 : 0.10) }
+                        GradientStop { position: 1.0; color: "transparent" }
+                    }
+                }
+
+                // Layer 2: Thanh đèn giả lập (Specular Rim Sheen)
+                Rectangle {
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.topMargin: 1
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    height: 1.5
+                    radius: 1
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+                        GradientStop { position: 0.0; color: "transparent" }
+                        GradientStop { position: 0.2; color: Qt.alpha("#ffffff", Theme.themeName === "light" ? 0.38 : 0.22) }
+                        GradientStop { position: 0.5; color: Qt.alpha("#ffffff", Theme.themeName === "light" ? 0.80 : 0.65) }
+                        GradientStop { position: 0.8; color: Qt.alpha("#ffffff", Theme.themeName === "light" ? 0.38 : 0.22) }
+                        GradientStop { position: 1.0; color: "transparent" }
+                    }
                 }
             }
 
@@ -291,12 +331,12 @@ Variants {
                                 anchors.bottomMargin: 2
                                 radius: Metrics.radiusLg
                                 border.width: clipItemDelegate.isSelected ? 1 : 0
-                                border.color: clipItemDelegate.isSelected ? Qt.alpha(Theme.accentColour, 0.28) : "transparent"
+                                border.color: clipItemDelegate.isSelected ? Qt.alpha(Theme.accentColour, 0.40) : "transparent"
 
                                 color: clipItemDelegate.isSelected
-                                    ? Theme.surfaceActive
+                                    ? Qt.alpha(Theme.accentColour, 0.22)
                                     : clipMouse.containsMouse
-                                        ? Theme.surfaceHover
+                                        ? Qt.alpha(Theme.contentColour, 0.08)
                                         : "transparent"
 
                                 Behavior on color { ColorAnimation { duration: Metrics.animFast } }
@@ -332,7 +372,7 @@ Variants {
                                                 anchors.centerIn: parent
                                                 iconName: clipItemDelegate.itemIcon
                                                 iconSize: Metrics.iconMd
-                                                iconColour: clipItemDelegate.isSelected ? (Theme.themeName === "light" ? "#ffffff" : Theme.surfaceColour) : Theme.accentColour
+                                                iconColour: clipItemDelegate.isSelected ? "#ffffff" : Theme.accentColour
                                             }
                                         }
                                     }
@@ -346,7 +386,7 @@ Variants {
                                         Text {
                                             Layout.fillWidth: true
                                             text: clipItemDelegate.itemTitle
-                                            color: clipItemDelegate.isSelected ? Theme.accentColour : Theme.textPrimary
+                                            color: clipItemDelegate.isSelected ? (Theme.themeName === "light" ? Theme.accentColour : "#ffffff") : Theme.textPrimary
                                             font.family: Typography.fontFamily
                                             font.pixelSize: Typography.sizeBodySm
                                             font.weight: clipItemDelegate.isSelected ? Typography.weightBold : Typography.weightMedium
@@ -356,7 +396,7 @@ Variants {
                                         Text {
                                             Layout.fillWidth: true
                                             text: clipItemDelegate.itemSubtitle
-                                            color: Theme.textSecondary
+                                            color: clipItemDelegate.isSelected ? Qt.alpha(Theme.contentColour, 0.75) : Theme.textSecondary
                                             font.family: Typography.fontFamily
                                             font.pixelSize: Typography.sizeMicro
                                             font.weight: Typography.weightNormal
@@ -572,12 +612,12 @@ Variants {
                             anchors.bottomMargin: 2
                             radius: Metrics.radiusLg
                             border.width: resultItem.isSelected ? 1 : 0
-                            border.color: resultItem.isSelected ? Qt.alpha(Theme.accentColour, 0.28) : "transparent"
+                            border.color: resultItem.isSelected ? Qt.alpha(Theme.accentColour, 0.40) : "transparent"
 
                             color: resultItem.isSelected
-                                ? Theme.surfaceActive
+                                ? Qt.alpha(Theme.accentColour, 0.22)
                                 : itemMouse.containsMouse
-                                    ? Theme.surfaceHover
+                                    ? Qt.alpha(Theme.contentColour, 0.08)
                                     : "transparent"
 
                             Behavior on color { ColorAnimation { duration: Metrics.animFast } }
@@ -616,7 +656,7 @@ Variants {
                                             anchors.centerIn: parent
                                             iconName: resultItem.itemIcon
                                             iconSize: Metrics.iconLg
-                                            iconColour: resultItem.isSelected ? (Theme.themeName === "light" ? "#ffffff" : Theme.surfaceColour) : Theme.accentColour
+                                            iconColour: resultItem.isSelected ? "#ffffff" : Theme.accentColour
                                         }
                                     }
                                 }
@@ -630,7 +670,7 @@ Variants {
                                     Text {
                                         Layout.fillWidth: true
                                         text: resultItem.itemTitle
-                                        color: resultItem.isSelected ? Theme.accentColour : Theme.textPrimary
+                                        color: resultItem.isSelected ? (Theme.themeName === "light" ? Theme.accentColour : "#ffffff") : Theme.textPrimary
                                         font.family: Typography.fontFamily
                                         font.pixelSize: Typography.sizeBody
                                         font.weight: resultItem.isSelected ? Typography.weightBold : Typography.weightDemiBold
@@ -640,7 +680,7 @@ Variants {
                                     Text {
                                         Layout.fillWidth: true
                                         text: resultItem.itemSubtitle
-                                        color: Theme.textSecondary
+                                        color: resultItem.isSelected ? Qt.alpha(Theme.contentColour, 0.75) : Theme.textSecondary
                                         font.family: Typography.fontFamily
                                         font.pixelSize: Typography.sizeCaption
                                         font.weight: Typography.weightNormal
@@ -777,40 +817,58 @@ Variants {
                         Item { Layout.fillWidth: true }
 
                         RowLayout {
-                            spacing: Metrics.spacingMd
+                            spacing: 8
 
-                            Text {
-                                text: I18n.t("spotlight.hint_tab")
-                                color: Theme.accentColour
-                                font.family: Typography.fontFamily
-                                font.pixelSize: Typography.sizeMicro
-                                font.weight: Typography.weightDemiBold
+                            KbdBadge {
+                                keyText: "Tab"
+                                labelText: I18n.t("spotlight.hint_navigate")
                             }
 
-                            Text {
-                                text: I18n.t("spotlight.hint_navigate")
-                                color: Theme.textSecondary
-                                font.family: Typography.fontFamily
-                                font.pixelSize: Typography.sizeMicro
-                                opacity: 0.75
+                            KbdBadge {
+                                keyText: "↵"
+                                labelText: SpotlightService.searchMode === 1 ? I18n.t("spotlight.hint_paste") : I18n.t("spotlight.hint_open")
                             }
 
-                            Text {
-                                text: SpotlightService.searchMode === 1 ? I18n.t("spotlight.hint_paste") : I18n.t("spotlight.hint_open")
-                                color: Theme.textSecondary
-                                font.family: Typography.fontFamily
-                                font.pixelSize: Typography.sizeMicro
-                                opacity: 0.75
-                            }
-
-                            Text {
-                                text: I18n.t("spotlight.hint_close")
-                                color: Theme.textSecondary
-                                font.family: Typography.fontFamily
-                                font.pixelSize: Typography.sizeMicro
-                                opacity: 0.75
+                            KbdBadge {
+                                keyText: "Esc"
+                                labelText: I18n.t("spotlight.hint_close")
                             }
                         }
+                    }
+                }
+
+                component KbdBadge: RowLayout {
+                    id: kbdRoot
+                    required property string keyText
+                    required property string labelText
+
+                    spacing: 5
+
+                    Rectangle {
+                        implicitHeight: 18
+                        implicitWidth: Math.max(18, keyLabel.implicitWidth + 8)
+                        radius: 4
+                        color: Theme.surfaceContainerColour
+                        border.width: 1
+                        border.color: Theme.borderDefault
+
+                        Text {
+                            id: keyLabel
+                            anchors.centerIn: parent
+                            text: kbdRoot.keyText
+                            color: Theme.textPrimary
+                            font.family: Typography.fontFamily
+                            font.pixelSize: 10
+                            font.weight: Typography.weightBold
+                        }
+                    }
+
+                    Text {
+                        text: kbdRoot.labelText
+                        color: Theme.textSecondary
+                        font.family: Typography.fontFamily
+                        font.pixelSize: Typography.sizeMicro
+                        font.weight: Typography.weightMedium
                     }
                 }
             }

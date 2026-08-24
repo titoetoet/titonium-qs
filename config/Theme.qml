@@ -31,6 +31,7 @@ QtObject {
 
     // ── Raw Palette Colours ──────────────────────────────────────────────────
     readonly property color surfaceColour: palette.surfaceColour
+    readonly property color surfaceColourBottom: palette.surfaceColourBottom
     readonly property color barSurfaceColour: palette.barSurfaceColour
     readonly property color surfaceContainerColour: palette.surfaceContainerColour
     readonly property color contentColour: palette.contentColour
@@ -39,14 +40,14 @@ QtObject {
     readonly property color popupShadowColour: palette.popupShadowColour
 
     // ── Semantic Color Tokens ────────────────────────────────────────────────
-    readonly property color borderSubtle: Qt.alpha(contentColour, 0.08)
-    readonly property color borderDefault: Qt.alpha(contentColour, 0.12)
-    readonly property color surfaceHover: Qt.alpha(contentColour, 0.05)
-    readonly property color surfaceHoverStrong: Qt.alpha(contentColour, 0.10)
-    readonly property color surfaceActive: themeName === "light"
-        ? Qt.alpha(accentColour, 0.14)
-        : Qt.tint(surfaceContainerColour, Qt.alpha(accentColour, 0.22))
-    readonly property color badgeBackground: Qt.alpha(accentColour, 0.16)
+    readonly property color borderSubtle: Qt.alpha("#ffffff", 0.04)
+    readonly property color borderDefault: Qt.alpha("#ffffff", 0.12)
+    readonly property color borderAccent: Qt.alpha(accentColour, 0.45)
+    readonly property color popupBorder: Qt.alpha("#ffffff", 0.14)
+    readonly property color surfaceHover: Qt.alpha("#ffffff", 0.08)
+    readonly property color surfaceHoverStrong: Qt.alpha("#ffffff", 0.14)
+    readonly property color surfaceActive: accentColour
+    readonly property color badgeBackground: Qt.alpha(accentColour, 0.20)
     readonly property color textPrimary: contentColour
     readonly property color textSecondary: onSurfaceVariantColour
 

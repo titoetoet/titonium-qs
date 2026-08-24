@@ -59,6 +59,19 @@ Variants {
         // When open, catches clicks anywhere; outside the panel dismisses it.
         mask: Region { item: inputTarget }
 
+        // ── Full-screen Scrim (Dimming Backdrop & Click-Outside Dismiss) ──
+        Rectangle {
+            id: scrimOverlay
+            anchors.fill: parent
+            color: Qt.alpha("#000000", 0.30)
+            opacity: ncWindow.isThisScreenOpen ? 1.0 : 0.0
+            visible: opacity > 0
+
+            Behavior on opacity {
+                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+            }
+        }
+
         Item {
             id: inputTarget
             x: 0
@@ -104,19 +117,59 @@ Variants {
             // Background
             Rectangle {
                 anchors.fill: parent
-                color: Theme.surfaceColour
                 radius: Theme.innerRadius
-                border.width: 0
-                clip: true
                 antialiasing: true
+
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: Theme.surfaceColour }
+                    GradientStop { position: 1.0; color: Theme.surfaceColourBottom }
+                }
+
+                border.width: 1
+                border.color: Theme.popupBorder
 
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     shadowEnabled: true
-                    blurMax: Theme.popupShadowRange
-                    shadowBlur: 1
-                    shadowVerticalOffset: 2
+                    blurMax: 32
+                    shadowBlur: 0.65
+                    shadowVerticalOffset: 8
                     shadowColor: Theme.popupShadowColour
+                }
+
+                // Layer 1: Top Ambient Caustic Glow (Soft liquid glass diffusion)
+                Rectangle {
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.margins: 1
+                    height: 36
+                    radius: Theme.innerRadius - 1
+                    clip: true
+                    gradient: Gradient {
+                        GradientStop { position: 0.0; color: Qt.alpha("#ffffff", Theme.themeName === "light" ? 0.30 : 0.12) }
+                        GradientStop { position: 1.0; color: "transparent" }
+                    }
+                }
+
+                // Layer 2: Thanh đèn giả lập (Specular Rim Sheen)
+                Rectangle {
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.topMargin: 1
+                    anchors.leftMargin: 12
+                    anchors.rightMargin: 12
+                    height: 1.5
+                    radius: 1
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+                        GradientStop { position: 0.0; color: "transparent" }
+                        GradientStop { position: 0.2; color: Qt.alpha("#ffffff", Theme.themeName === "light" ? 0.40 : 0.25) }
+                        GradientStop { position: 0.5; color: Qt.alpha("#ffffff", Theme.themeName === "light" ? 0.85 : 0.70) }
+                        GradientStop { position: 0.8; color: Qt.alpha("#ffffff", Theme.themeName === "light" ? 0.40 : 0.25) }
+                        GradientStop { position: 1.0; color: "transparent" }
+                    }
                 }
             }
 
@@ -132,9 +185,9 @@ Variants {
                     Rectangle {
                         anchors.centerIn: parent
                         width: parent.width - 24
-                        height: 32
-                        radius: 10
-                        color: Theme.surfaceContainerColour
+                        height: 34
+                        radius: 12
+                        color: Qt.alpha(Theme.contentColour, 0.06)
 
                         // Sliding indicator
                         Rectangle {
@@ -142,8 +195,8 @@ Variants {
                             y: 2
                             width: parent.width / 2 - 2
                             height: parent.height - 4
-                            radius: 8
-                            color: Qt.alpha(Theme.contentColour, 0.12)
+                            radius: 10
+                            color: Qt.alpha(Theme.contentColour, 0.14)
                             Behavior on x {
                                 enabled: ncWindow.isThisScreenOpen
                                 NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
@@ -166,12 +219,13 @@ Variants {
 
                                     RowLayout {
                                         anchors.centerIn: parent
-                                        spacing: 5
+                                        spacing: 6
 
                                         Text {
                                             text: tabItem.modelData
-                                            color: tabItem.isActive ? Theme.contentColour : Theme.onSurfaceVariantColour
-                                            font.pixelSize: 13
+                                            color: tabItem.isActive ? Theme.contentColour : Qt.alpha(Theme.contentColour, 0.55)
+                                            font.family: Typography.fontFamily
+                                            font.pixelSize: 12
                                             font.weight: tabItem.isActive ? Font.DemiBold : Font.Normal
                                             Behavior on color { ColorAnimation { duration: 150 } }
                                         }
@@ -251,86 +305,177 @@ Variants {
                     width: parent.width
                     spacing: 0
 
-                    Item { Layout.fillWidth: true; implicitHeight: 10 }
+                    Item { Layout.fillWidth: true; implicitHeight: 12 }
 
-                    Rectangle {
+                    // ── 1. Naked Weather Section (Single Seamless Surface) ─────
+                    ColumnLayout {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 16; Layout.rightMargin: 16
-                        implicitHeight: 64
-                        radius: 14
-                        color: Theme.surfaceContainerColour
+                        Layout.leftMargin: 18; Layout.rightMargin: 18
+                        spacing: 8
 
                         RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: 14
-                            anchors.rightMargin: 14
+                            Layout.fillWidth: true
                             spacing: 12
 
                             MaterialIcon {
                                 iconName: WeatherService.iconName
-                                iconSize: 30
-                                iconColour: Theme.onSurfaceVariantColour
+                                iconSize: 34
+                                iconColour: WeatherService.iconColour
+
+                                Behavior on iconColour { ColorAnimation { duration: Metrics.animFast } }
                             }
 
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 1
+
                                 Text {
                                     text: WeatherService.temperatureText
                                     color: Theme.contentColour
-                                    font.pixelSize: 20
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: 22
                                     font.weight: Font.DemiBold
                                 }
+
                                 Text {
                                     text: WeatherService.description
-                                    color: Theme.onSurfaceVariantColour
+                                    color: Qt.alpha(Theme.contentColour, 0.55)
+                                    font.family: Typography.fontFamily
                                     font.pixelSize: 11
                                 }
                             }
 
                             Text {
                                 text: WeatherService.location
-                                color: Theme.onSurfaceVariantColour
-                                font.pixelSize: 10
+                                color: Qt.alpha(Theme.contentColour, 0.45)
+                                font.family: Typography.fontFamily
+                                font.pixelSize: 11
+                                font.weight: Font.Medium
                             }
                         }
+
+                        // Weather Sub-metrics (Humidity, Feels like, Wind)
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 16
+
+                            RowLayout {
+                                spacing: 4
+                                MaterialIcon {
+                                    iconName: "water_drop"
+                                    iconSize: 14
+                                    iconColour: "#8be9fd" // Dracula Cyan
+                                }
+                                Text {
+                                    text: WeatherService.humidity + "%"
+                                    color: Qt.alpha(Theme.contentColour, 0.50)
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: 10
+                                    font.weight: Font.Medium
+                                }
+                            }
+
+                            RowLayout {
+                                spacing: 4
+                                MaterialIcon {
+                                    iconName: "thermostat"
+                                    iconSize: 14
+                                    iconColour: "#ffb86c" // Dracula Orange
+                                }
+                                Text {
+                                    text: "Feels " + (Number.isFinite(WeatherService.feelsLike) ? Math.round(WeatherService.feelsLike) + "°" : "--°")
+                                    color: Qt.alpha(Theme.contentColour, 0.50)
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: 10
+                                    font.weight: Font.Medium
+                                }
+                            }
+
+                            RowLayout {
+                                spacing: 4
+                                MaterialIcon {
+                                    iconName: "air"
+                                    iconSize: 14
+                                    iconColour: "#6272a4" // Dracula Comment Blue
+                                }
+                                Text {
+                                    text: Math.round(WeatherService.windSpeed) + " km/h"
+                                    color: Qt.alpha(Theme.contentColour, 0.50)
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: 10
+                                    font.weight: Font.Medium
+                                }
+                            }
+
+                            Item { Layout.fillWidth: true }
+                        }
                     }
 
                     Item { Layout.fillWidth: true; implicitHeight: 12 }
 
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        Layout.leftMargin: 16; Layout.rightMargin: 16
-                        spacing: 2
-                        Text {
-                            text: weekDayNames[now.getDay()]
-                            color: Theme.onSurfaceVariantColour
-                            font.pixelSize: 11; font.weight: Font.Medium
-                        }
-                        Text {
-                            text: monthNames[todayMonth] + " " + todayDay + ", " + todayYear
-                            color: Theme.contentColour
-                            font.pixelSize: 22; font.weight: Font.Light
-                        }
-                    }
-
-                    Item { Layout.fillWidth: true; implicitHeight: 14 }
+                    // Soft Refractive Divider
                     Rectangle {
-                        Layout.fillWidth: true; Layout.leftMargin: 16; Layout.rightMargin: 16
-                        implicitHeight: 1; color: Qt.alpha(Theme.contentColour, 0.08)
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 20; Layout.rightMargin: 20
+                        implicitHeight: 1
+                        gradient: Gradient {
+                            orientation: Gradient.Horizontal
+                            GradientStop { position: 0.0; color: "transparent" }
+                            GradientStop { position: 0.5; color: Qt.alpha(Theme.contentColour, 0.08) }
+                            GradientStop { position: 1.0; color: "transparent" }
+                        }
                     }
+
                     Item { Layout.fillWidth: true; implicitHeight: 12 }
 
+                    // ── 2. Naked Calendar Section with Lunar Calendar (Âm Lịch) ────
                     ColumnLayout {
+                        id: calCol
                         Layout.fillWidth: true
-                        Layout.leftMargin: 16; Layout.rightMargin: 16
-                        spacing: 4
+                        Layout.leftMargin: 18; Layout.rightMargin: 18
+                        spacing: 10
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+
+                            Text {
+                                text: weekDayNames[now.getDay()]
+                                color: Qt.alpha(Theme.contentColour, 0.50)
+                                font.family: Typography.fontFamily
+                                font.pixelSize: 11
+                                font.weight: Font.Medium
+                            }
+
+                            RowLayout {
+                                spacing: 8
+
+                                Text {
+                                    text: monthNames[todayMonth] + " " + todayDay + ", " + todayYear
+                                    color: Theme.contentColour
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: 19
+                                    font.weight: Font.Light
+                                }
+
+                                Text {
+                                    readonly property var curLunar: LunarService.convertSolar2Lunar(todayDay, todayMonth + 1, todayYear)
+                                    text: "·  " + curLunar.day + "/" + curLunar.month + " Âm (" + curLunar.yearName + ")"
+                                    color: "#8be9fd" // Dracula Cyan
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: 11
+                                    font.weight: Font.Medium
+                                }
+                            }
+                        }
 
                         RowLayout {
                             Layout.fillWidth: true
 
                             IconButton {
-                                iconName: "chevron_left"; buttonSize: 28; accessibleName: "Previous month"
+                                iconName: "chevron_left"
+                                buttonSize: 26
+                                accessibleName: "Previous month"
                                 onTriggered: displayedMonth = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth() - 1, 1)
                             }
 
@@ -338,11 +483,16 @@ Variants {
                                 Layout.fillWidth: true
                                 horizontalAlignment: Text.AlignHCenter
                                 text: Qt.formatDate(displayedMonth, "MMMM yyyy")
-                                color: Theme.contentColour; font.pixelSize: 13; font.weight: Font.DemiBold
+                                color: Theme.contentColour
+                                font.family: Typography.fontFamily
+                                font.pixelSize: 12
+                                font.weight: Font.DemiBold
                             }
 
                             IconButton {
-                                iconName: "chevron_right"; buttonSize: 28; accessibleName: "Next month"
+                                iconName: "chevron_right"
+                                buttonSize: 26
+                                accessibleName: "Next month"
                                 onTriggered: displayedMonth = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth() + 1, 1)
                             }
                         }
@@ -350,118 +500,388 @@ Variants {
                         DayOfWeekRow {
                             Layout.fillWidth: true
                             locale: Qt.locale()
+                            spacing: 2
                             delegate: Text {
                                 required property var model
                                 horizontalAlignment: Text.AlignHCenter
                                 text: model.shortName
-                                color: Theme.onSurfaceVariantColour; font.pixelSize: 10; font.weight: Font.Medium
+                                color: Qt.alpha(Theme.contentColour, 0.40)
+                                font.family: Typography.fontFamily
+                                font.pixelSize: 10
+                                font.weight: Font.Medium
                             }
                         }
 
                         MonthGrid {
+                            id: monthGrid
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 196
+                            Layout.preferredHeight: 210
                             month: displayedMonth.getMonth()
                             year: displayedMonth.getFullYear()
                             locale: Qt.locale()
-                            spacing: 1
+                            spacing: 2
 
-                            delegate: Rectangle {
+                            delegate: Item {
                                 id: dayCell
                                 required property var model
-                                color: model.today ? Theme.accentColour : "transparent"
-                                radius: height / 2
 
+                                readonly property var lunarData: LunarService.convertSolar2Lunar(dayCell.model.day, dayCell.model.month + 1, dayCell.model.year)
+                                readonly property bool isCurrentMonth: dayCell.model.month === displayedMonth.getMonth()
+                                readonly property bool isToday: dayCell.model.today
+
+                                // Background pill (Today highlight or hover pill) - Symmetrically centered
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width: Math.min(parent.width - 2, 44)
+                                    height: parent.height - 2
+                                    radius: 7
+                                    color: dayCell.isToday
+                                        ? Theme.accentColour
+                                        : (cellMouse.containsMouse ? Qt.alpha(Theme.contentColour, 0.08) : "transparent")
+
+                                    Behavior on color { ColorAnimation { duration: Metrics.animFast } }
+                                }
+
+                                // Solar Day (Lịch Dương - Số to rõ ràng, nằm ở tâm ô)
                                 Text {
                                     anchors.centerIn: parent
+                                    anchors.verticalCenterOffset: -3
                                     text: dayCell.model.day
-                                    color: dayCell.model.today ? Theme.surfaceColour
-                                        : dayCell.model.month === displayedMonth.getMonth()
-                                            ? Theme.contentColour : Theme.onSurfaceVariantColour
-                                    opacity: dayCell.model.month === displayedMonth.getMonth() || dayCell.model.today ? 1 : 0.35
-                                    font.pixelSize: 10
-                                    font.weight: dayCell.model.today ? Font.Bold : Font.Normal
+                                    color: dayCell.isToday ? "#ffffff"
+                                        : dayCell.isCurrentMonth ? Theme.contentColour : Qt.alpha(Theme.contentColour, 0.22)
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: 13
+                                    font.weight: dayCell.isToday ? Font.Bold : (dayCell.isCurrentMonth ? Font.DemiBold : Font.Normal)
+                                }
+
+                                // Lunar Day (Lịch Âm - Số nhỏ gọn, nằm phía dưới và lệch nhẹ sang phải 6px)
+                                Text {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.horizontalCenterOffset: 6
+                                    anchors.bottom: parent.bottom
+                                    anchors.bottomMargin: 2
+                                    text: dayCell.lunarData.displayText
+                                    color: dayCell.isToday
+                                        ? Qt.alpha("#ffffff", 0.95)
+                                        : dayCell.lunarData.isSpecial
+                                            ? "#ff79c6" // Dracula Pink rực rỡ cho Mùng 1 & Rằm 15
+                                            : (dayCell.isCurrentMonth ? "#f1fa8c" : Qt.alpha("#f1fa8c", 0.30)) // Dracula Gold (#f1fa8c)
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: 8
+                                    font.weight: (dayCell.lunarData.isSpecial || dayCell.isToday) ? Font.Bold : Font.Medium
+                                }
+
+                                MouseArea {
+                                    id: cellMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
                                 }
                             }
                         }
                     }
 
-                    Item { Layout.fillWidth: true; implicitHeight: 14 }
-                    Rectangle {
-                        Layout.fillWidth: true; Layout.leftMargin: 16; Layout.rightMargin: 16
-                        implicitHeight: 1; color: Qt.alpha(Theme.contentColour, 0.08)
-                    }
-                    Item { Layout.fillWidth: true; implicitHeight: 12 }
+                    Item { Layout.fillWidth: true; implicitHeight: 10 }
 
+                    // Soft Refractive Divider
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 20; Layout.rightMargin: 20
+                        implicitHeight: 1
+                        gradient: Gradient {
+                            orientation: Gradient.Horizontal
+                            GradientStop { position: 0.0; color: "transparent" }
+                            GradientStop { position: 0.5; color: Qt.alpha(Theme.contentColour, 0.08) }
+                            GradientStop { position: 1.0; color: "transparent" }
+                        }
+                    }
+
+                    Item { Layout.fillWidth: true; implicitHeight: 10 }
+
+                    // ── 3. Daily Lunar Wisdom Quote (Song ngữ Anh - Việt) ────
+                    ColumnLayout {
+                        id: quoteBox
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 18; Layout.rightMargin: 18
+                        spacing: 4
+
+                        readonly property var dailyQuote: LunarService.getDailyQuote(todayDay, todayMonth + 1, todayYear)
+
+                        RowLayout {
+                            spacing: 6
+                            MaterialIcon {
+                                iconName: "auto_awesome"
+                                iconSize: 13
+                                iconColour: "#bd93f9" // Dracula Purple
+                            }
+                            Text {
+                                text: I18n.t("wisdom.header")
+                                color: Qt.alpha(Theme.contentColour, 0.45)
+                                font.family: Typography.fontFamily
+                                font.pixelSize: 10
+                                font.weight: Font.DemiBold
+                            }
+                        }
+
+                        // Primary Quote (follows I18n locale)
+                        Text {
+                            Layout.fillWidth: true
+                            text: "“" + (I18n.locale === "vi" ? quoteBox.dailyQuote.vi : quoteBox.dailyQuote.en) + "”"
+                            color: Qt.alpha(Theme.contentColour, 0.90)
+                            font.family: Typography.fontFamily
+                            font.pixelSize: 11
+                            font.weight: Font.Medium
+                            wrapMode: Text.WordWrap
+                            lineHeight: 1.25
+                        }
+
+                        // Secondary Translation (bilingual subtitle)
+                        Text {
+                            Layout.fillWidth: true
+                            text: I18n.locale === "vi" ? quoteBox.dailyQuote.en : quoteBox.dailyQuote.vi
+                            color: Qt.alpha(Theme.contentColour, 0.50)
+                            font.family: Typography.fontFamily
+                            font.pixelSize: 10
+                            font.italic: true
+                            wrapMode: Text.WordWrap
+                            lineHeight: 1.2
+                        }
+                    }
+
+                    Item { Layout.fillWidth: true; implicitHeight: 10 }
+
+                    // ── 4. Naked Upcoming Events (Single Seamless Surface) ─────
                     ColumnLayout {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 16; Layout.rightMargin: 16
-                        spacing: 8
+                        Layout.leftMargin: 18; Layout.rightMargin: 18
+                        spacing: 6
+
                         Text {
-                            text: "UPCOMING"
-                            color: Theme.onSurfaceVariantColour
-                            font.pixelSize: 10; font.weight: Font.DemiBold; font.letterSpacing: 0.8
+                            text: "Upcoming"
+                            color: Qt.alpha(Theme.contentColour, 0.50)
+                            font.family: Typography.fontFamily
+                            font.pixelSize: 11
+                            font.weight: Font.DemiBold
                         }
+
                         Repeater {
                             model: [
-                                { time: "10:00 AM", title: "Team Standup",       color: "#ffb4ab" },
-                                { time: "2:00 PM",  title: "Design Review",      color: "#8bd5ca" },
-                                { time: "7:00 PM",  title: "Dinner reservation", color: "#c6a0f6" }
+                                { time: "10:00 AM", title: "Team Standup",       color: "#ffb86c" },
+                                { time: "2:00 PM",  title: "Design Review",      color: "#8be9fd" },
+                                { time: "7:00 PM",  title: "Dinner reservation", color: "#bd93f9" }
                             ]
                             Rectangle {
                                 id: ev
                                 required property var modelData
-                                Layout.fillWidth: true; implicitHeight: 48; radius: 10
-                                color: Theme.surfaceContainerColour
-                                Rectangle {
-                                    width: 3; height: parent.height - 12
-                                    anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter
-                                    radius: 2; color: ev.modelData.color
+                                Layout.fillWidth: true
+                                implicitHeight: 40
+                                radius: 8
+                                color: evMouse.containsMouse ? Qt.alpha(Theme.contentColour, 0.08) : "transparent"
+
+                                Behavior on color { ColorAnimation { duration: Metrics.animFast } }
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 8
+                                    anchors.rightMargin: 8
+                                    spacing: 10
+
+                                    // Minimal Accent Bead
+                                    Rectangle {
+                                        width: 4
+                                        height: 18
+                                        radius: 2
+                                        color: ev.modelData.color
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: ev.modelData.title
+                                        color: Theme.contentColour
+                                        font.family: Typography.fontFamily
+                                        font.pixelSize: 12
+                                        font.weight: Font.Medium
+                                    }
+
+                                    Text {
+                                        text: ev.modelData.time
+                                        color: Qt.alpha(Theme.contentColour, 0.55)
+                                        font.family: Typography.fontFamily
+                                        font.pixelSize: 11
+                                    }
                                 }
-                                ColumnLayout {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.left: parent.left; anchors.right: parent.right
-                                    anchors.leftMargin: 14; anchors.rightMargin: 12
-                                    spacing: 2
-                                    Text { text: ev.modelData.title; color: Theme.contentColour; font.pixelSize: 12; font.weight: Font.Medium }
-                                    Text { text: ev.modelData.time; color: Theme.onSurfaceVariantColour; font.pixelSize: 10 }
+
+                                MouseArea {
+                                    id: evMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
                                 }
                             }
                         }
                     }
 
-                    Item { Layout.fillWidth: true; implicitHeight: 14 }
-                    Rectangle {
-                        Layout.fillWidth: true; Layout.leftMargin: 16; Layout.rightMargin: 16
-                        implicitHeight: 1; color: Qt.alpha(Theme.contentColour, 0.08)
-                    }
-                    Item { Layout.fillWidth: true; implicitHeight: 12 }
+                    Item { Layout.fillWidth: true; implicitHeight: 10 }
 
+                    // Soft Refractive Divider
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 20; Layout.rightMargin: 20
+                        implicitHeight: 1
+                        gradient: Gradient {
+                            orientation: Gradient.Horizontal
+                            GradientStop { position: 0.0; color: "transparent" }
+                            GradientStop { position: 0.5; color: Qt.alpha(Theme.contentColour, 0.08) }
+                            GradientStop { position: 1.0; color: "transparent" }
+                        }
+                    }
+
+                    Item { Layout.fillWidth: true; implicitHeight: 10 }
+
+                    // ── 5. Live Google News Section ────────────────────────────
                     ColumnLayout {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 16; Layout.rightMargin: 16
+                        Layout.leftMargin: 18; Layout.rightMargin: 18
                         spacing: 8
 
-                        Text {
-                            text: "NEWS"
-                            color: Theme.onSurfaceVariantColour
-                            font.pixelSize: 10; font.weight: Font.DemiBold; font.letterSpacing: 0.8
+                        // News Header Row with Category Selector & Refresh Button
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+
+                            Text {
+                                text: I18n.t("news.header")
+                                color: Qt.alpha(Theme.contentColour, 0.50)
+                                font.family: Typography.fontFamily
+                                font.pixelSize: 11
+                                font.weight: Font.DemiBold
+                            }
+
+                            Item { Layout.fillWidth: true }
+
+                            // Category Switcher Pills
+                            RowLayout {
+                                spacing: 4
+
+                                Repeater {
+                                    model: NewsService.categories
+
+                                    Rectangle {
+                                        id: catBtn
+                                        required property var modelData
+                                        readonly property bool isSelected: NewsService.currentCategory === catBtn.modelData.id
+
+                                        implicitHeight: 22
+                                        implicitWidth: catTxt.implicitWidth + 12
+                                        radius: 6
+                                        color: isSelected
+                                            ? Qt.alpha(catBtn.modelData.color, 0.22)
+                                            : (catMouse.containsMouse ? Qt.alpha(Theme.contentColour, 0.08) : "transparent")
+                                        border.width: isSelected ? 1 : 0
+                                        border.color: isSelected ? Qt.alpha(catBtn.modelData.color, 0.50) : "transparent"
+
+                                        Behavior on color { ColorAnimation { duration: Metrics.animFast } }
+
+                                        Text {
+                                            id: catTxt
+                                            anchors.centerIn: parent
+                                            text: (catBtn.modelData && catBtn.modelData.nameKey) ? I18n.t(catBtn.modelData.nameKey) : ""
+                                            color: catBtn.isSelected
+                                                ? (catBtn.modelData?.color || Theme.accentColour)
+                                                : Qt.alpha(Theme.contentColour, catMouse.containsMouse ? 0.85 : 0.45)
+                                            font.family: Typography.fontFamily
+                                            font.pixelSize: 10
+                                            font.weight: catBtn.isSelected ? Font.DemiBold : Font.Normal
+
+                                            Behavior on color { ColorAnimation { duration: Metrics.animFast } }
+                                        }
+
+                                        MouseArea {
+                                            id: catMouse
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: NewsService.fetchNews(catBtn.modelData.id)
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Refresh Button
+                            Rectangle {
+                                width: 22
+                                height: 22
+                                radius: 11
+                                color: refMouse.containsMouse ? Qt.alpha(Theme.contentColour, 0.12) : "transparent"
+
+                                Behavior on color { ColorAnimation { duration: Metrics.animFast } }
+
+                                MaterialIcon {
+                                    id: refIcon
+                                    anchors.centerIn: parent
+                                    iconName: "refresh"
+                                    iconSize: 13
+                                    iconColour: NewsService.loading ? Theme.accentColour : Qt.alpha(Theme.contentColour, 0.50)
+
+                                    NumberAnimation on rotation {
+                                        running: NewsService.loading
+                                        from: 0
+                                        to: 360
+                                        duration: 800
+                                        loops: Animation.Infinite
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: refMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: NewsService.fetchNews(NewsService.currentCategory, true)
+                                }
+                            }
                         }
 
-                        Repeater {
-                            model: [
-                                { headline: "KDE Plasma 6.5 released with HDR improvements", source: "Phoronix", time: "2h ago", accent: "#8bd5ca", snippet: "HDR, fractional scaling, and new defaults land in the latest desktop release." },
-                                { headline: "Hyprland 0.47 ships grouped windows", source: "Hyprland Blog", time: "5h ago", accent: "#c6a0f6", snippet: "Grouped windows and better multi-monitor handling headline this Wayland compositor update." },
-                                { headline: "Linux 6.14 LTS kernel released", source: "Kernel.org", time: "1d ago", accent: "#eed49f", snippet: "Long-term support kernel adds new hardware enablement and scheduler improvements." }
-                            ]
+                        // Loading / Error / Article List
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 4
 
-                            NewsCard {
-                                required property var modelData
-                                headline: modelData.headline
-                                source: modelData.source
-                                time: modelData.time
-                                accent: modelData.accent
-                                snippet: modelData.snippet
+                            // Loading state
+                            Item {
+                                Layout.fillWidth: true
+                                implicitHeight: 40
+                                visible: NewsService.loading && NewsService.articles.length === 0
+
+                                RowLayout {
+                                    anchors.centerIn: parent
+                                    spacing: 8
+                                    MaterialIcon {
+                                        iconName: "sync"
+                                        iconSize: 16
+                                        iconColour: Theme.accentColour
+                                    }
+                                    Text {
+                                        text: I18n.t("news.loading")
+                                        color: Qt.alpha(Theme.contentColour, 0.55)
+                                        font.family: Typography.fontFamily
+                                        font.pixelSize: 11
+                                    }
+                                }
+                            }
+
+                            // Articles Repeater
+                            Repeater {
+                                model: NewsService.articles
+
+                                NewsCard {
+                                    required property var modelData
+                                    headline: modelData.headline
+                                    source: modelData.source
+                                    time: modelData.time
+                                    accent: modelData.accent
+                                    link: modelData.link
+                                }
                             }
                         }
                     }
@@ -505,25 +925,46 @@ Variants {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.leftMargin: 16; Layout.rightMargin: 12
-                    Layout.topMargin: 4; Layout.bottomMargin: 4
+                    Layout.leftMargin: 16; Layout.rightMargin: 16
+                    Layout.topMargin: 6; Layout.bottomMargin: 6
 
                     Text {
                         Layout.fillWidth: true
                         text: NotificationService.count > 0
                             ? NotificationService.count + " Notification" + (NotificationService.count !== 1 ? "s" : "")
-                            : "No Notifications"
-                        color: Theme.onSurfaceVariantColour
-                        font.pixelSize: 11; font.weight: Font.DemiBold
+                            : "Notifications"
+                        color: Qt.alpha(Theme.contentColour, 0.50)
+                        font.family: Typography.fontFamily
+                        font.pixelSize: 11
+                        font.weight: Font.DemiBold
                     }
 
                     Rectangle {
                         visible: NotificationService.count > 0
-                        implicitHeight: 24; implicitWidth: clrTxt.implicitWidth + 16
-                        radius: 12
-                        color: clrMa.containsMouse ? Qt.alpha(Theme.contentColour, 0.1) : "transparent"
-                        Text { id: clrTxt; anchors.centerIn: parent; text: "Clear All"; color: Theme.accentColour; font.pixelSize: 11 }
-                        MouseArea { id: clrMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: NotificationService.clearAll() }
+                        implicitHeight: 24
+                        implicitWidth: clrTxt.implicitWidth + 16
+                        radius: 8
+                        color: clrMa.containsMouse ? Qt.alpha(Theme.contentColour, 0.12) : "transparent"
+
+                        Behavior on color { ColorAnimation { duration: Metrics.animFast } }
+
+                        Text {
+                            id: clrTxt
+                            anchors.centerIn: parent
+                            text: "Clear All"
+                            color: Theme.accentColour
+                            font.family: Typography.fontFamily
+                            font.pixelSize: 11
+                            font.weight: Font.Medium
+                        }
+
+                        MouseArea {
+                            id: clrMa
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: NotificationService.clearAll()
+                        }
                     }
                 }
 
@@ -545,12 +986,14 @@ Variants {
                                 MaterialIcon {
                                     Layout.alignment: Qt.AlignHCenter
                                     iconName: "notifications_off"; iconSize: 36
-                                    iconColour: Qt.alpha(Theme.onSurfaceVariantColour, 0.35); fill: 0
+                                    iconColour: Qt.alpha(Theme.contentColour, 0.25); fill: 0
                                 }
                                 Text {
                                     Layout.alignment: Qt.AlignHCenter
                                     text: "No notifications"
-                                    color: Qt.alpha(Theme.onSurfaceVariantColour, 0.45); font.pixelSize: 12
+                                    color: Qt.alpha(Theme.contentColour, 0.40)
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: 12
                                 }
                             }
                         }
@@ -580,20 +1023,23 @@ Variants {
                                 Layout.fillWidth: true
                                 Layout.leftMargin: 12; Layout.rightMargin: 12
                                 implicitHeight: content.implicitHeight + 24
-                                radius: 14
-                                color: Theme.surfaceContainerColour
+                                radius: 12
+                                color: Qt.alpha(Theme.contentColour, 0.05)
+                                border.width: 1
+                                border.color: Qt.alpha(Theme.contentColour, 0.06)
 
                                 // Urgency accent bar
                                 Rectangle {
                                     anchors.left: parent.left
                                     anchors.top: parent.top
                                     anchors.bottom: parent.bottom
+                                    anchors.margins: 4
                                     width: 3
-                                    radius: 2
-                                    color: card.critical ? Theme.accentColour
+                                    radius: 1.5
+                                    color: card.critical ? "#ff5555"
                                         : (card.hasNotif && card.notification.urgency === NotificationUrgency.Low)
-                                            ? Qt.alpha(Theme.onSurfaceVariantColour, 0.35)
-                                            : Theme.downloadIconColour
+                                            ? Qt.alpha(Theme.contentColour, 0.20)
+                                            : Theme.accentColour
                                 }
 
                                 ColumnLayout {
@@ -626,27 +1072,31 @@ Variants {
 
                                         Text {
                                             Layout.fillWidth: true
-                                            text: card.appLabel.toUpperCase()
-                                            color: Theme.onSurfaceVariantColour
-                                            font.pixelSize: 10; font.weight: Font.DemiBold; font.letterSpacing: 0.5
+                                            text: card.appLabel
+                                            color: Qt.alpha(Theme.contentColour, 0.55)
+                                            font.family: Typography.fontFamily
+                                            font.pixelSize: 11
+                                            font.weight: Font.DemiBold
                                         }
 
                                         Text {
                                             text: card.hasNotif ? formatRelative(NotificationService.receivedTime(card.notification.id), viewClock.date) : ""
-                                            color: Theme.onSurfaceVariantColour
+                                            color: Qt.alpha(Theme.contentColour, 0.45)
+                                            font.family: Typography.fontFamily
                                             font.pixelSize: 10
                                         }
 
                                         Item {
-                                            width: 18; height: 18
+                                            width: 20; height: 20
                                             Rectangle {
-                                                anchors.fill: parent; radius: height / 2
-                                                color: cardDismiss.containsMouse ? Qt.alpha(Theme.contentColour, 0.12) : Qt.alpha(Theme.contentColour, 0.06)
+                                                anchors.fill: parent; radius: 10
+                                                color: cardDismiss.containsMouse ? Qt.alpha(Theme.contentColour, 0.14) : "transparent"
+                                                Behavior on color { ColorAnimation { duration: Metrics.animFast } }
                                             }
                                             MaterialIcon {
                                                 anchors.centerIn: parent
-                                                iconName: "close"; iconSize: 11
-                                                iconColour: Theme.onSurfaceVariantColour
+                                                iconName: "close"; iconSize: 13
+                                                iconColour: Qt.alpha(Theme.contentColour, 0.60)
                                             }
                                             MouseArea {
                                                 id: cardDismiss
@@ -665,6 +1115,7 @@ Variants {
                                         Layout.fillWidth: true
                                         text: card.notifSummary
                                         color: Theme.contentColour
+                                        font.family: Typography.fontFamily
                                         font.pixelSize: 12; font.weight: Font.Medium
                                         elide: Text.ElideRight
                                         visible: text.length > 0
@@ -673,21 +1124,14 @@ Variants {
                                     Text {
                                         Layout.fillWidth: true
                                         text: card.notifBody
-                                        color: Theme.onSurfaceVariantColour
+                                        color: Qt.alpha(Theme.contentColour, 0.65)
+                                        font.family: Typography.fontFamily
                                         font.pixelSize: 11
                                         wrapMode: Text.WordWrap
                                         maximumLineCount: 4
                                         elide: Text.ElideRight
                                         textFormat: Text.PlainText
                                         visible: text.length > 0
-                                    }
-
-                                    Image {
-                                        Layout.fillWidth: true
-                                        Layout.preferredHeight: 120
-                                        fillMode: Image.PreserveAspectFit
-                                        source: card.notifImage
-                                        visible: card.notifImage.length > 0
                                     }
 
                                     // Action buttons
@@ -702,23 +1146,27 @@ Variants {
                                             delegate: Rectangle {
                                                 id: actionBtn
 
-                                                required property NotificationAction modelData
+                                                required property var modelData
 
                                                 readonly property bool hasAction: actionBtn.modelData !== null && actionBtn.modelData !== undefined
 
-                                                implicitHeight: 28
-                                                implicitWidth: actionLabel.implicitWidth + 20
-                                                radius: 14
+                                                implicitHeight: 26
+                                                implicitWidth: actionLabel.implicitWidth + 18
+                                                radius: 8
                                                 color: actionPointer.containsMouse
-                                                    ? Qt.tint(Theme.surfaceContainerColour, Qt.alpha(Theme.contentColour, 0.12))
-                                                    : Qt.alpha(Theme.contentColour, 0.06)
+                                                    ? Qt.alpha(Theme.contentColour, 0.14)
+                                                    : Qt.alpha(Theme.contentColour, 0.07)
+
+                                                Behavior on color { ColorAnimation { duration: Metrics.animFast } }
 
                                                 Text {
                                                     id: actionLabel
                                                     anchors.centerIn: parent
                                                     text: actionBtn.hasAction ? (actionBtn.modelData.text || "") : ""
                                                     color: Theme.contentColour
+                                                    font.family: Typography.fontFamily
                                                     font.pixelSize: 11
+                                                    font.weight: Font.Medium
                                                 }
 
                                                 MouseArea {

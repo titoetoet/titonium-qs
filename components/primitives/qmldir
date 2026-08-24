@@ -3,3 +3,5 @@ MaterialIcon 1.0 MaterialIcon.qml
 IconButton 1.0 IconButton.qml
 ToggleSwitch 1.0 ToggleSwitch.qml
 AudioVisualizer 1.0 AudioVisualizer.qml
+PanelCard 1.0 PanelCard.qml
+

@@ -37,6 +37,7 @@
 ### 🖥️ 1. Screen Frame & TopBar
 - **Screen Frame (`ScreenFrame.qml`)**: 5px system border with smooth rounded display corners.
 - **TopBar (`TopBar.qml`)**: Floating bar with blur effect, drop shadows, and responsive widget layout.
+- **Single Unified Hyprland Focus Grab**: Eliminates exclusive seat grab lockups, ensuring windows (terminals, browsers, editors) maintain mouse responsiveness.
 - **Workspace Switcher (`WorkspaceWidget.qml`)**: 5-cell workspace indicator synchronized across Hyprland outputs.
 - **Active Window Badge (`ActiveWindowWidget.qml`)**: Truncated active application title with hover inspection card.
 - **System Monitoring Dropdown (`MonitorWidget.qml`)**: Real-time CPU, GPU, RAM, Temperature, and Load Average.
@@ -50,19 +51,22 @@
 
 ### 🔔 2. Notification System (D-Bus `org.freedesktop.Notifications`)
 
-#### 🗂️ Vertical Multi-Card Toast Stack (`NotificationPopup.qml`):
+#### 🗂️ Dynamic Slide-Push Toast Stack (`NotificationPopup.qml`):
+- **Top-Right Default Position**: Floating toast cards docked cleanly at the top-right corner.
+- **Dynamic Slide-Push Effect**: When the Notification Center drawer opens, floating toasts **automatically glide 375px to the left** with a smooth `250ms Easing.OutCubic` curve, avoiding any visual overlap, and slide back when the drawer closes.
 - **Multi-Monitor Overlay**: Independent notification layer per display output (`WlrLayershell.Overlay`).
+- **Decluttered Layout**: Removed heavy thumbnail images for a streamlined, compact card aesthetic.
 - **Toast Stack**: Stack up to 4 concurrent cards with individual 5-second auto-hide countdown timers.
-- **Clean Previews**: Formats title and body into single-line previews.
 - **Independent Dismissal**: Click **`✕`** to dismiss individual toasts immediately.
 
-#### 📋 Notification Center & Calendar Drawer (`NotificationCenter.qml`):
+#### 📋 Notification Center & Live Hub (`NotificationCenter.qml`):
 - **Slide-in Notification Drawer**: Multi-screen side drawer with tabbed interface (`Today` and `Notifications`).
+- **Live Google News Section (`NewsService.qml`)**: Real-time headlines across multiple topics (*Tech*, *Nation*, *Sports*, *World*) with auto-locale feed URL switching and relative timestamps.
+- **Daily Lunar Wisdom (`LunarService.qml`)**: Dual-language philosophical quotes integrated with astronomical solar-to-lunar date conversion and lunar phase detection.
 - **Permanent Retention**: Notifications remain stored in the panel until explicitly cleared.
 - **Auto-Tab Switch**: Automatically opens directly into the `Notifications` tab when unread items exist.
 - **TopBar Unread Indicator Dot**: Amber/Rose accent dot on the bell icon for unread notifications.
 - **Action Buttons & Inline Reply**: Support for interactive notification actions and inline text replies.
-- **One-Click Clear All**: Dismiss all notifications at once.
 
 ---
 
@@ -84,39 +88,39 @@
 
 ---
 
-### 🚀 4. System Dashboard & Control Center (`Dashboard.qml`)
+### 🚀 4. Launchpad & Dashboard (`LauncherWidget.qml` / `Dashboard.qml`)
 
-- **Balanced Dimensions**: 570px × 540px popup bounds with centered 440px content card.
-- **Custom Profile Avatar**:
-  - Live hover edit overlay.
-  - **12-Icon Preset Picker** (Arch Linux, Tux, Robot, Code, Terminal, Palette, Rocket, etc.).
-  - Persisted across shell reloads and reboots via `SettingsService.qml`.
-- **System Specs Panel**:
-  - Consolidated specifications: CPU Model, GPU Device, Memory, Shell, Kernel, Resolution, Uptime, and Package count.
-- **Session Actions**:
-  - Dedicated power controls: Shutdown, Restart, Sleep, Hibernate, and Logout.
-- **Settings Trigger (⚙️)**: Quick access to shell configuration.
+- **16:9 Widescreen Proportions**: 960px × 540px canvas engineered with golden ratio proportions.
+- **Expanded Sidebar**: 260px wide category selector with 40px row heights and intuitive icons.
+- **Apple-Style Fluid Page Carousel**: Smooth multi-page horizontal scrolling (`420ms Easing.OutQuint`), 3D depth zoom transitions, and mouse wheel debounce.
+- **Sequential Category Crossfade**: 2-phase animation (`140ms` fade-out ➔ filter ➔ `260ms` fade-in) eliminating item overlap.
+- **Custom Profile Avatar**: Live hover edit overlay with 12 preset icons persisted via `SettingsService.qml`.
+- **System Specs & Controls**: CPU/GPU specs, memory, kernel, uptime, and dedicated power management actions.
 
 ---
 
 ### 🔍 5. Spotlight Launcher & Split-View Clipboard (`Spotlight.qml`)
 
 - **Universal Search (`SUPER + SPACE`)**:
-  - Fuzzy application search with icons and desktop entry execution.
+  - High-contrast selection pills with bold white typography.
+  - Fuzzy application search with desktop entry execution.
   - **Instant Math Evaluator**: Type `25 * 4 + 10`, `sqrt(144)`, or `sin(pi/2)` for instant calculations.
   - **System Quick Actions**: Type `lock`, `shutdown`, `reboot`, `suspend`, `terminal` for immediate execution.
   - **Tab-cycling modes**: `Tab` cycles between `All` ➔ `Clipboard` ➔ `Files` ➔ `All`.
 - **2-Column Clipboard History (`SUPER + V`)**:
   - Inset split-view layout with item list on the left and live preview on the right.
-  - Smart classification tags: **URLs 🌐**, **Code snippets 💻**, **Color swatches 🎨** (with live hex color card), and **Text 📄**.
-  - Real-time statistics: Character count, word count, line count, and relative timestamps (`2m ago`, `1h ago`).
+  - Smart classification tags: **URLs 🌐**, **Code snippets 💻**, **Color swatches 🎨**, and **Text 📄**.
+  - Real-time statistics: Character count, word count, line count, and relative timestamps.
 
 ---
 
-### 🕒 6. Analog Clock & Timezone Widget (`ClockWidget.qml`)
+### 🕒 6. Swiss Luxury Analog Clock (`ClockWidget.qml`)
 
-- **164px Analog Clock Dial**: Minimalist mechanical clock face with smooth hands.
-- **Timezone Card**: Local Indochina Time display (`Asia/Ho_Chi_Minh • UTC+07:00 (ICT)`).
+- **Haute Horlogerie Clock Dial**: Borderless 204px diameter dial floating directly on the glass popup backdrop.
+- **Obsidian Sunburst Finish**: Concentric chapter rings with 60 precision minute/hour ticks.
+- **Applied Faceted Batons**: 12, 3, 6, 9 double luminous batons with single polished markers for remaining hours.
+- **Faceted Sword Hands**: Luminous inlay core on hour and minute hands, with a sweeping needle second hand and circular counterweight.
+- **Timezone**: Configured for **Đà Nẵng** (`Asia/Ho_Chi_Minh • UTC+07:00 (ICT)`).
 
 ---
 
@@ -127,11 +131,12 @@
 
 ---
 
-### 🎨 8. Theming Engine (`Theme.qml`)
+### 🎨 8. Liquid Glass & Theming Engine (`Theme.qml` / `PopupPanel.qml`)
 
-- **Dark Theme**: Material 3 rose-tinted dark palette.
-- **Light Theme**: Clean crisp white palette.
-- Reactive tokens: Surfaces, containers, borders, typography, and accent colors.
+- **macOS Sequoia / Sonoma Drop Shadows**: Soft, natural 0.38 alpha Gaussian shadows (`blurMax: 32`, `shadowBlur: 0.65`, `shadowVerticalOffset: 8px`).
+- **Liquid Glass Caustic Glow**: Top ambient diffused glow on all popups.
+- **Specular Rim Sheen**: 1.5px horizontal focal light reflection simulating beveled glass edges.
+- **Dracula & Light Modes**: Reactive design tokens for surfaces, containers, borders, typography, and accents.
 
 ---
 
@@ -149,128 +154,67 @@ yay -S hyprland quickshell-git qt6-declarative qt6-quick-effects qt6-svg
 sudo pacman -S --needed \
     pipewire \
     wireplumber \
-    playerctl \
     networkmanager \
     bluez \
     bluez-utils \
+    brightnessctl \
+    playerctl \
     wl-clipboard \
-    lm_sensors \
     libnotify \
-    curl \
-    jq \
-    xdg-utils
+    lm_sensors
 ```
 
-### 3. Recommended Applications
+### 3. Recommended Typography & Icons
 ```bash
-sudo pacman -S --needed kitty thunar hyprlock fcitx5 fcitx5-unikey
-```
+sudo pacman -S --needed \
+    ttf-font-awesome \
+    ttf-jetbrains-mono \
+    noto-fonts \
+    noto-fonts-cjk \
+    noto-fonts-emoji
 
-### 4. Typography & Fonts
-```bash
-yay -S ttf-sf-pro ttf-jetbrains-mono ttf-material-symbols-variable-git
+# Install SF Pro Display and Material Symbols Rounded for authentic UI rendering
 ```
-*(Or place `SF-Pro-Display-*.otf` into `~/.local/share/fonts/` and run `fc-cache -fv`)*
 
 ---
 
 ## 🚀 Installation & Setup
 
-### Step 1: Clone or Place into Quickshell Config
-```bash
-mkdir -p ~/.config/quickshell
-git clone git@github.com:titoetoet/titonium-qs.git ~/.config/quickshell/titonium
-```
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/titoetoet/titonium-qs.git ~/.config/quickshell/titonium
+   ```
 
-### Step 2: Configure Hyprland Keybindings
+2. **Launch quickshell**:
+   ```bash
+   quickshell -p ~/.config/quickshell/titonium
+   ```
 
-Add the following keybindings to your Hyprland configuration:
+3. **Autostart with Hyprland (`~/.config/hypr/hyprland.conf`)**:
+   ```ini
+   exec-once = quickshell -p ~/.config/quickshell/titonium
+   ```
 
-#### 🔹 In `~/.config/hypr/hyprland.lua` (Lua format):
-```lua
--- Spotlight Launcher
-hl.bind(mainMod .. " + space", hl.dsp.exec_cmd("qs -c titonium ipc call spotlight toggle"))
-hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("qs -c titonium ipc call spotlight toggle"))
+---
 
--- Clipboard History Split-View
-hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("qs -c titonium ipc call spotlight clipboard"))
-hl.bind(mainMod .. " + SHIFT + V", hl.dsp.window.float({ action = "toggle" }))
+## ⌨️ Keybindings
 
--- Window Switcher
-hl.bind(mainMod .. " + TAB", function()
-    hl.dispatch(hl.dsp.exec_cmd("qs -c titonium ipc call window-switcher next"))
-    hl.dispatch(hl.dsp.submap("switcher"))
-end)
-```
+Add the following shortcuts to your `hyprland.conf` for quick access:
 
-#### 🔹 In `~/.config/hypr/hyprland.conf` (Conf format):
 ```ini
 # Spotlight Launcher
 bind = SUPER, SPACE, exec, qs -c titonium ipc call spotlight toggle
 bind = SUPER, R, exec, qs -c titonium ipc call spotlight toggle
 
-# Clipboard History Split-View
+# Clipboard History (Split-View)
 bind = SUPER, V, exec, qs -c titonium ipc call spotlight clipboard
-bind = SUPER_SHIFT, V, togglefloating,
 
-# Window Switcher
-bind = SUPER, TAB, exec, qs -c titonium ipc call window-switcher next
-```
-
-### Step 3: Autostart with Hyprland
-Add this line to your Hyprland startup config:
-```ini
-exec-once = qs -c titonium
+# Alt+Tab Window Switcher
+bind = SUPER, TAB, exec, qs -c titonium ipc call windowSwitcher toggle
 ```
 
 ---
 
-## 🎮 Keyboard Shortcuts
+## 📜 License
 
-| Shortcut | Action | Description |
-| :--- | :--- | :--- |
-| **`SUPER + SPACE`** | **Spotlight Launcher** | Opens floating universal search bar |
-| **`SUPER + V`** | **Clipboard History** | Opens Spotlight directly in 2-Column Split-View |
-| **`SUPER + L`** | **Lock Screen** | Locks session with hyprlock |
-| **`Tab`** | **Cycle Modes** | Inside Spotlight: Switch between `All` ➔ `Clipboard` ➔ `Files` |
-| **`↑` / `↓`** | **Navigate** | Move highlight selection in Spotlight, Switcher, or Menus |
-| **`Enter`** | **Execute / Paste** | Launch selected app, execute calculation, or copy clipboard item |
-| **`Esc`** | **Dismiss** | Close active popup, Spotlight, or Notification Center |
-| **`SUPER + TAB`** | **Window Switcher** | Alt+Tab multitasking overlay |
-
----
-
-## 🛠️ CLI & IPC Commands
-
-You can control `titonium` remotely or script actions using Quickshell IPC:
-
-```bash
-# Toggle Spotlight
-qs -c titonium ipc call spotlight toggle
-
-# Open Clipboard History directly
-qs -c titonium ipc call spotlight clipboard
-
-# Close Spotlight
-qs -c titonium ipc call spotlight close
-
-# Window Switcher controls
-qs -c titonium ipc call window-switcher next
-qs -c titonium ipc call window-switcher previous
-qs -c titonium ipc call window-switcher accept
-qs -c titonium ipc call window-switcher close
-```
-
----
-
-## 📚 Technical Documentation
-
-For in-depth architecture diagrams, Singleton service specifications, and layer-shell design standards, see:
-👉 **[ARCHITECTURE.md](./ARCHITECTURE.md)**
-
----
-
-## 📄 License
-
-MIT License © 2026 cole
-
+Licensed under the [MIT License](LICENSE).

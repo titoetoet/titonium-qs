@@ -26,6 +26,9 @@ Singleton {
     // Emitted whenever a new notification arrives (used by the popup toast layer).
     signal notificationReceived(var notification)
 
+    // Emitted when Notification Center opens, clearing floating toasts
+    signal clearAllToastsRequested()
+
     // ── Notification daemon ─────────────────────────────────────────────────
     NotificationServer {
         id: server

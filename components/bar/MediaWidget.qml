@@ -216,7 +216,10 @@ Item {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Metrics.marginMd
+            anchors.leftMargin: 14
+            anchors.rightMargin: 14
+            anchors.topMargin: root.joinDepth + 12
+            anchors.bottomMargin: 14
             spacing: Metrics.spacingSm
 
             // 1. Header Row (Music Icon Badge + Track Info)

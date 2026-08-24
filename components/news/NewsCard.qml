@@ -3,6 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import "../../config"
+import "../primitives"
+import "../../services"
 
 Rectangle {
     id: root
@@ -11,69 +13,101 @@ Rectangle {
     required property string source
     required property string time
     required property color accent
+    required property string link
     property string snippet: ""
 
     Layout.fillWidth: true
-    implicitHeight: snippet.length > 0 ? 92 : 64
-    radius: 10
-    color: Theme.surfaceContainerColour
+    implicitHeight: col.implicitHeight + 16
+    radius: 8
+    color: cardMouse.containsMouse ? Qt.alpha(Theme.contentColour, 0.08) : "transparent"
 
-    Rectangle {
-        anchors.left: parent.left
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.topMargin: 9
-        anchors.bottomMargin: 9
-        width: 3
-        radius: 2
-        color: root.accent
-    }
+    Behavior on color { ColorAnimation { duration: Metrics.animFast } }
 
-    ColumnLayout {
+    RowLayout {
+        id: mainRow
         anchors.fill: parent
-        anchors.leftMargin: 14
-        anchors.rightMargin: 12
-        anchors.topMargin: 10
+        anchors.leftMargin: 8
+        anchors.rightMargin: 10
+        anchors.topMargin: 8
         anchors.bottomMargin: 8
-        spacing: 3
+        spacing: 10
 
-        Text {
-            Layout.fillWidth: true
-            text: root.headline
-            color: Theme.contentColour
-            font.pixelSize: 12
-            font.weight: Font.Medium
-            elide: Text.ElideRight
+        // Minimal Accent Bead
+        Rectangle {
+            Layout.alignment: Qt.AlignTop
+            Layout.topMargin: 2
+            width: 3.5
+            height: 18
+            radius: 1.75
+            color: root.accent
         }
 
-        Text {
+        ColumnLayout {
+            id: col
             Layout.fillWidth: true
-            visible: root.snippet.length > 0
-            text: root.snippet
-            color: Theme.onSurfaceVariantColour
-            font.pixelSize: 10
-            wrapMode: Text.WordWrap
-            maximumLineCount: 2
-            elide: Text.ElideRight
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 6
-
-            Text {
-                text: root.source
-                color: Theme.onSurfaceVariantColour
-                font.pixelSize: 10
-            }
+            spacing: 3
 
             Text {
                 Layout.fillWidth: true
-                horizontalAlignment: Text.AlignRight
-                text: root.time
-                color: Theme.onSurfaceVariantColour
-                font.pixelSize: 10
+                text: root.headline
+                color: cardMouse.containsMouse ? Theme.contentColour : Qt.alpha(Theme.contentColour, 0.90)
+                font.family: Typography.fontFamily
+                font.pixelSize: 12
+                font.weight: Font.Medium
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
+                elide: Text.ElideRight
+                lineHeight: 1.2
+
+                Behavior on color { ColorAnimation { duration: Metrics.animFast } }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 6
+
+                Text {
+                    text: root.source
+                    color: root.accent
+                    font.family: Typography.fontFamily
+                    font.pixelSize: 10
+                    font.weight: Font.DemiBold
+                }
+
+                Text {
+                    text: "·"
+                    color: Qt.alpha(Theme.contentColour, 0.35)
+                    font.pixelSize: 10
+                }
+
+                Text {
+                    text: root.time
+                    color: Qt.alpha(Theme.contentColour, 0.45)
+                    font.family: Typography.fontFamily
+                    font.pixelSize: 10
+                }
+
+                Item { Layout.fillWidth: true }
+
+                MaterialIcon {
+                    visible: cardMouse.containsMouse
+                    iconName: "open_in_new"
+                    iconSize: 12
+                    iconColour: Qt.alpha(Theme.contentColour, 0.60)
+                }
             }
         }
     }
+
+    MouseArea {
+        id: cardMouse
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: {
+            if (root.link)
+                NewsService.openArticle(root.link);
+        }
+    }
 }
+

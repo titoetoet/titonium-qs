@@ -12,6 +12,7 @@ Singleton {
     readonly property string settingsFilePath: configDir + "/settings.json"
     property string avatarIcon: "person"
     property int visualizerMode: 0 // 0: Bars, 1: Waveform, 2: Floating Dots
+    property var recentApps: []
 
     Component.onCompleted: {
         loadSettings();
@@ -37,6 +38,9 @@ Singleton {
             if (typeof data.visualizerMode === "number") {
                 root.visualizerMode = Math.max(0, Math.min(2, Math.floor(data.visualizerMode)));
             }
+            if (Array.isArray(data.recentApps)) {
+                root.recentApps = data.recentApps;
+            }
         } catch (e) {
             console.warn("Failed to parse settings.json:", e);
         }
@@ -45,6 +49,15 @@ Singleton {
     function setAvatarIcon(iconName: string): void {
         if (!iconName) return;
         root.avatarIcon = iconName;
+        saveSettings();
+    }
+
+    function recordRecentApp(appName: string): void {
+        if (!appName) return;
+        let list = (root.recentApps || []).filter(n => n !== appName);
+        list.unshift(appName);
+        if (list.length > 24) list = list.slice(0, 24);
+        root.recentApps = list;
         saveSettings();
     }
 
@@ -60,7 +73,8 @@ Singleton {
     function saveSettings(): void {
         const payload = JSON.stringify({
             avatarIcon: root.avatarIcon,
-            visualizerMode: root.visualizerMode
+            visualizerMode: root.visualizerMode,
+            recentApps: root.recentApps
         }, null, 2);
 
         Quickshell.execDetached([

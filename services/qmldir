@@ -10,3 +10,5 @@ singleton WindowSwitcherService 1.0 WindowSwitcherService.qml
 singleton SpotlightService 1.0 SpotlightService.qml
 singleton ClipboardService 1.0 ClipboardService.qml
 singleton SettingsService 1.0 SettingsService.qml
+singleton LunarService 1.0 LunarService.qml
+singleton NewsService 1.0 NewsService.qml

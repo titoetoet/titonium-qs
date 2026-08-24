@@ -9,14 +9,19 @@ Rectangle {
     required property string iconName
     property int buttonSize: Theme.widgetHeight
     property string accessibleName: ""
+    property bool active: false
     signal triggered
 
     implicitWidth: buttonSize
     implicitHeight: buttonSize
     radius: height / 2
-    color: pointer.containsMouse
-        ? Qt.tint(Theme.surfaceContainerColour, Qt.alpha(Theme.contentColour, 0.08))
-        : "transparent"
+    color: root.active
+        ? Qt.alpha(Theme.contentColour, 0.14)
+        : pointer.containsMouse
+            ? Qt.tint(Theme.surfaceContainerColour, Qt.alpha(Theme.contentColour, 0.08))
+            : "transparent"
+
+    Behavior on color { ColorAnimation { duration: Metrics.animFast } }
 
     MaterialIcon {
         anchors.centerIn: parent

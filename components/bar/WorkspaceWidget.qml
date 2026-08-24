@@ -23,8 +23,15 @@ Rectangle {
     }
 
     function occupied(workspace: int): bool {
-        return Hyprland.workspaces.values.some(item =>
-            item.id === workspace && (item.lastIpcObject?.windows ?? 0) > 0);
+        try {
+            const vals = Hyprland.workspaces.values;
+            for (let i = 0; i < vals.length; i++) {
+                const item = vals[i];
+                if (item && item.id === workspace && (item.lastIpcObject?.windows ?? 0) > 0)
+                    return true;
+            }
+        } catch (e) {}
+        return false;
     }
 
     function focusWorkspace(workspace: int): void {
@@ -84,7 +91,7 @@ Rectangle {
                     anchors.centerIn: parent
                     text: workspaceItem.workspace
                     color: workspaceItem.isActive
-                        ? Theme.surfaceColour
+                        ? "#ffffff"
                         : workspaceItem.isOccupied
                             ? Theme.contentColour
                             : Theme.onSurfaceVariantColour

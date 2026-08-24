@@ -9,7 +9,7 @@ QtObject {
     // ── Bar & Screen Frame ───────────────────────────────────────────────────
     readonly property int barHeight: 40
     readonly property int borderThickness: 5
-    readonly property int innerRadius: 16
+    readonly property int innerRadius: 20
     readonly property int barContentMargin: 8
     readonly property int widgetHeight: 30
     readonly property int widgetSpacing: 4
@@ -27,9 +27,9 @@ QtObject {
     readonly property int spotlightTopOffset: 30
 
     // ── Clock Popup Dimensions ───────────────────────────────────────────────
-    readonly property int clockPopupWidth: 320
-    readonly property int clockPopupHeight: 380
-    readonly property int clockDialSize: 164
+    readonly property int clockPopupWidth: 330
+    readonly property int clockPopupHeight: 390
+    readonly property int clockDialSize: 200
     readonly property int clockPadding: 16
 
     // ── Media Popup Dimensions ───────────────────────────────────────────────
@@ -45,7 +45,7 @@ QtObject {
     readonly property int ncPanelWidth: 360
     readonly property real ncPanelHeightRatio: 0.60
     readonly property int notificationPopupWidth: 340
-    readonly property int popupShadowRange: 15
+    readonly property int popupShadowRange: 32
 
     // ── Dashboard Dimensions ─────────────────────────────────────────────────
     readonly property int dashboardWidth: 570
@@ -70,11 +70,11 @@ QtObject {
     // ── Corner Radii Design Tokens ───────────────────────────────────────────
     readonly property int radiusXs: 4
     readonly property int radiusSm: 6
-    readonly property int radiusMd: 8
-    readonly property int radiusLg: 10
-    readonly property int radiusXl: 14
-    readonly property int radiusCard: 16
-    readonly property int radiusPill: 20
+    readonly property int radiusMd: 10
+    readonly property int radiusLg: 12
+    readonly property int radiusXl: 16
+    readonly property int radiusCard: 20
+    readonly property int radiusPill: 22
 
     // ── Icon Sizes Design Tokens ─────────────────────────────────────────────
     readonly property int iconXs: 11

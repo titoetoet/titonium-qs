@@ -62,9 +62,31 @@ QtObject {
 
             // Media & Clock
             "media.player": "Media",
-            "clock.timezone_title": "Ho Chi Minh City",
+            "clock.timezone_title": "Da Nang",
             "clock.timezone_subtitle": "Indochina Time (ICT) • UTC+07:00",
-            "notification.title": "NOTIFICATION"
+            "notification.title": "NOTIFICATION",
+
+            // News & Wisdom
+            "news.header": "Headlines",
+            "news.loading": "Loading latest headlines...",
+            "news.cat_tech": "Tech",
+            "news.cat_nation": "Nation",
+            "news.cat_sports": "Sports",
+            "news.cat_world": "World",
+            "wisdom.header": "Daily Wisdom",
+
+            // Launcher (macOS Style)
+            "launcher.search_placeholder": "Search applications...",
+            "launcher.category_all": "All",
+            "launcher.category_internet": "Internet",
+            "launcher.category_dev": "Developer",
+            "launcher.category_media": "Media",
+            "launcher.category_system": "System",
+            "launcher.category_utilities": "Utilities",
+            "launcher.no_apps": "No applications found",
+            "launcher.avatar_picker_title": "Choose an Avatar",
+            "launcher.close": "Close",
+            "launcher.edit_avatar": "Edit Avatar"
         },
         "vi": {
             // Spotlight & Search
@@ -118,9 +140,31 @@ QtObject {
 
             // Media & Clock
             "media.player": "Trình phát nhạc",
-            "clock.timezone_title": "Hồ Chí Minh",
+            "clock.timezone_title": "Đà Nẵng",
             "clock.timezone_subtitle": "Giờ Đông Dương (ICT) • UTC+07:00",
-            "notification.title": "THÔNG BÁO"
+            "notification.title": "THÔNG BÁO",
+
+            // News & Wisdom
+            "news.header": "Tin tức",
+            "news.loading": "Đang tải tin tức mới nhất...",
+            "news.cat_tech": "Công nghệ",
+            "news.cat_nation": "Xã hội",
+            "news.cat_sports": "Thể thao",
+            "news.cat_world": "Thế giới",
+            "wisdom.header": "Lời hay ý đẹp",
+
+            // Launcher (macOS Style)
+            "launcher.search_placeholder": "Tìm kiếm ứng dụng...",
+            "launcher.category_all": "Tất cả",
+            "launcher.category_internet": "Internet",
+            "launcher.category_dev": "Phát triển",
+            "launcher.category_media": "Media",
+            "launcher.category_system": "Hệ thống",
+            "launcher.category_utilities": "Tiện ích",
+            "launcher.no_apps": "Không tìm thấy ứng dụng",
+            "launcher.avatar_picker_title": "Chọn biểu tượng Avatar",
+            "launcher.close": "Đóng",
+            "launcher.edit_avatar": "Đổi Avatar"
         }
     })
 
